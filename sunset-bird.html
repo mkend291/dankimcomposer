@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunset Bird - Dan Kim</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="sunset-footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+                .tab-card, .tab-header, .tab-btn, .tab-content {
+                    font-family: 'Avenir', 'Avenir Next', sans-serif !important;
+                }
+        @font-face {
+            font-family: 'Hanzipen';
+            src: local('HanziPen TC'), local('HanziPen SC'), local('Hanzipen'), url('https://fonts.cdnfonts.com/s/14644/HanziPenSC-Regular.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        .sunset-title, .sunset-main-title, .tab-btn, .flip-card-title, .performer-name {
+            font-family: 'Quicksand', 'Nunito', 'Avenir', sans-serif;
+        }
+        .sunset-footer {
+            text-align: center;
+            font-size: 3.2rem;
+            margin-top: 2.5rem;
+            margin-bottom: 2.5rem;
+            color: #111 !important;
+            font-family: 'Indie Flower', 'Quicksand', 'Nunito', 'Avenir', sans-serif;
+            font-weight: 700;
+        }
+            .video-responsive {
+                position: relative;
+                width: 100%;
+                max-width: 700px;
+                margin: 0 auto;
+                aspect-ratio: 16 / 9;
+                background: #000;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            .video-responsive iframe {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border: none;
+            }
+        body {
+            background: linear-gradient(135deg, #b3e6ff 0%, #e6f7ff 100%) !important;
+            color: #222 !important;
+        }
+        .sunset-title {
+            text-align: center;
+            margin-top: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 2.2rem;
+            font-weight: 400;
+            color: #111;
+            font-family: 'Indie Flower', 'Quicksand', 'Nunito', 'Avenir', sans-serif;
+            font-weight: 700;
+        }
+        .sunset-main-title {
+            text-align: center;
+            font-size: 5rem;
+                    /* Removed media query so font size stays at 5rem on all screens */
+            font-weight: 900;
+            color: #111;
+            font-family: 'Indie Flower', 'Quicksand', 'Nunito', 'Avenir', sans-serif;
+            margin-bottom: 0.2rem;
+            letter-spacing: 0.04em;
+            text-shadow: 0 2px 12px #e6f7ff;
+        }
+        .tab-card {
+            background: #c6efc0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(42,143,255,0.08);
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .tab-header {
+            border-bottom: 1px solid #2a8fff;
+        }
+        .tab-btn {
+            color: #222;
+            background: #7db8ff;
+            border: none;
+            font-weight: 600;
+        }
+        .tab-btn.active {
+            background: #569cd6;
+            color: #fff;
+        }
+        .tab-content {
+            background: #c6efc0;
+            color: #222;
+        }
+        .performer-card {
+            background: #b3e6ff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(42,143,255,0.08);
+        }
+        .performer-img {
+            border: 2px solid #2a8fff;
+        }
+        .performer-name {
+            color: #2a8fff;
+        }
+        .flip-card-front {
+            background: #e6f7ff;
+        }
+        .flip-card-title {
+            background: rgba(179,230,255,0.92);
+            color: #2a8fff;
+        }
+        .flip-card-back {
+            background: #b3e6ff;
+            color: #222;
+        }
+        .sunset-footer {
+            color: #2a8fff;
+        }
+        .seagull-anim {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 0.1rem;
+            padding: 0;
+            margin-top: -5.5rem;
+        }
+        .seagull-img {
+            width: 180px;
+            height: auto;
+            transition: opacity 0.2s;
+            margin: 0;
+            padding: 0;
+            border: none;
+        }
+        .sunset-info {
+            text-align: center;
+            color: #111;
+            font-size: 1.2rem;
+                margin-bottom: 1.5rem;
+                margin-top: -5rem;
+        }
+        .sunset-recital {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 500;
+                margin-top: -1rem;
+            margin-bottom: 1.5rem;
+            margin-top: -1.5rem;
+        }
+        .sunset-youtube {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .sunset-youtube a {
+            color: #569cd6;
+            font-size: 1.1rem;
+            text-decoration: underline;
+        }
+        .sunset-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .tab-header {
+            display: flex;
+            border-bottom: 1px solid #569cd6;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            background: #7db8ff;
+            border: none;
+            color: #222;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .tab-btn.active {
+            background: #569cd6;
+            color: #fff;
+        }
+        .tab-content {
+            padding: 1.5rem;
+        }
+        .performer-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            justify-content: center;
+        }
+        .performer-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 120px;
+        }
+        .performer-img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 0.5rem;
+            border: 2px solid #f7e7b2;
+        }
+            .performer-list-vertical {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+                align-items: center;
+                margin-top: 2rem;
+            }
+            .performer-card-vertical {
+                width: 320px;
+                height: 220px;
+                background-size: cover;
+                background-position: center;
+                border-radius: 16px;
+                box-shadow: 0 4px 18px rgba(42,143,255,0.10);
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                align-items: flex-end;
+                justify-content: flex-end;
+            }
+            .performer-overlay {
+                width: 100%;
+                background: rgba(38,50,56,0.55);
+                color: #fff;
+                padding: 0.7rem 1rem 0.7rem 1rem;
+                text-align: left;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                border-bottom-left-radius: 16px;
+                border-bottom-right-radius: 16px;
+            }
+            .performer-name-vertical {
+                font-size: 1.2rem;
+                font-weight: 700;
+                margin-bottom: 0.1rem;
+                text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+            }
+            .performer-role-vertical {
+                font-size: 1rem;
+                font-weight: 400;
+                opacity: 0.92;
+                text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        }
+        .flip-card {
+            background: none;
+            perspective: 1000px;
+            height: 340px;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.7s cubic-bezier(.4,2,.3,1);
+            transform-style: preserve-3d;
+        }
+        .flip-card:hover .flip-card-inner,
+        .flip-card:focus .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+        }
+        .flip-card-front {
+            background: #1a1f3a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .flip-card-img {
+            width: 100%;
+            height: 80%;
+            object-fit: cover;
+        }
+        .flip-card-title {
+            width: 100%;
+            background: rgba(6,6,32,0.92);
+            color: #f7e7b2;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 0.7rem 0.2rem;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        .flip-card-back {
+            background: #060620;
+            color: #e0e0e0;
+            transform: rotateY(180deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            font-size: 1.05rem;
+        }
+        .sunset-footer {
+            text-align: center;
+            color: #f7e7b2;
+            font-size: 1.3rem;
+            margin: 3rem 0 2rem 0;
+        }
+        @media (max-width: 600px) {
+            .sunset-main-title { font-size: 2.5rem; }
+            .tab-card { width: 98vw; }
+            .flip-card { height: 260px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">DANIEL KIM</a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="works.html" class="nav-link">Works</a></li>
+                <li><a href="requests.html" class="nav-link">Requests</a></li>
+                <li class="dropdown">
+                    <a href="#" class="nav-link">More ▾</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="events.html" class="dropdown-link">Events</a></li>
+                        <li><a href="converter.html" class="dropdown-link">Text to Music Converter</a></li>
+                        <li><a href="chord-progression.html" class="dropdown-link">Chord Progression Generator</a></li>
+                        <li><a href="sunset-bird.html" class="dropdown-link">Sunset Bird</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <main>
+        <div class="sunset-title">Welcome to</div>
+        <div class="sunset-main-title" style="font-family: 'Indie Flower', 'Quicksand', 'Nunito', 'Avenir', sans-serif; font-size: 4.2rem; font-weight: bold; color: #111; margin-bottom: 0.2rem; margin-top: -2.2rem; text-align: center; letter-spacing: 0.04em; text-shadow: 0 2px 12px #e6f7ff;">Sunset Bird</div>
+        <div class="seagull-anim">
+            <img src="sunsetbird/seagullanim1.png" id="seagullImg" class="seagull-img" alt="Seagull blinking">
+            <img src="sunsetbird/seagullanim2.png" id="seagullImgBlink" class="seagull-img" alt="Seagull blink" style="position:absolute;left:50%;transform:translateX(-50%);opacity:0;pointer-events:none;">
+        </div>
+        <div class="sunset-info">
+            April 2, 2023 &nbsp;•&nbsp; 8PM &nbsp;•&nbsp; Recital Studio
+        </div>
+        <div class="sunset-recital">BM Composition Senior Recital &nbsp;•&nbsp; UT Austin</div>
+        <div class="sunset-youtube">
+            <div class="video-responsive">
+                <iframe src="https://www.youtube.com/embed/iyqI6_b5RI8" title="Sunset Bird Recital" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+        <div class="sunset-tabs">
+            <div class="tab-card">
+                <div class="tab-header">
+                    <button class="tab-btn active" id="notesTab">Program Notes</button>
+                    <button class="tab-btn" id="performersTab">Performers</button>
+                </div>
+                <div class="tab-content" id="tabContent">
+                    <!-- Program Notes content here -->
+                    <div id="notesContent">
+                        <p>(Welcome to) Sunset Bird is a reflection on the “Studio Ghibli Tribute” concert series hosted by the Asian Memory Project, of which I was a part. Writing in the style of Joe Hisaishi took me back to the days when I watched anime, notably an anime composer Nomii Yuuji worked on called Nichijou. There is a particular characteristic to the soundtracks for Japanese animations - its quirkiness, familiarity, and comfort. Sunset Bird is my sincere attempt to create music in the spirit of these animations. It uses the same instrumentation as the “Studio Ghibli Tribute” concerts.<br><br>The suite represents a slice of life, or “a day in the life of...” kind of story. It is loosely based on the initial premise of the video game “Our Life: Beginnings and Always,” where a child has moved to a new coastal town called Sunset Bird (the origin of this suite’s title) and is attempting to settle in.<br><br>Performance Duration: approx. 50 min. (w/ intermission)</p>
+                    </div>
+                    <div id="performersContent" style="display:none;">
+                        <div class="performer-list-vertical">
+                            <div class="performer-card-vertical" style="background-image: url('SunsetBird/Julian.png');">
+                                <div class="performer-overlay">
+                                    <div class="performer-name-vertical">Julian Frank</div>
+                                    <div class="performer-role-vertical">Piano</div>
+                                </div>
+                            </div>
+                            <div class="performer-card-vertical" style="background-image: url('SunsetBird/Dorothy.png');">
+                                <div class="performer-overlay">
+                                    <div class="performer-name-vertical">Dorothy Lê</div>
+                                    <div class="performer-role-vertical">Flute</div>
+                                </div>
+                            </div>
+                            <div class="performer-card-vertical" style="background-image: url('SunsetBird/Hudson.png');">
+                                <div class="performer-overlay">
+                                    <div class="performer-name-vertical">Hudson Schill</div>
+                                    <div class="performer-role-vertical">Cello</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="sunset-cards">
+            <!-- 10 vertically stacked cards -->
+            <div class="vertical-cards">
+                <div class="vertical-card">
+                    <img src="sunsetbird/1. seagulls.png" class="card-icon" alt="Seagulls">
+                    <div class="card-content">
+                        <div class="card-title">1. Seagulls</div>
+                        <div class="card-desc">"Seagulls" introduces the small town and depicts the main character at the beach encountering some friendly people and some not-so-friendly animals.</div>
+                    </div>
+                </div>
+                <div class="vertical-card">
+                    <img src="sunsetbird/2. a stroll.png" class="card-icon" alt="A Stroll">
+                    <div class="card-content">
+                        <div class="card-title">2. A Stroll</div>
+                        <div class="card-desc">"A Stroll" moves on to the interaction between the main character and their new acquaintance as they spend time at the beach.</div>
+                    </div>
+                </div>
+                <div class="vertical-card">
+                    <img src="sunsetbird/3. fireflies.png" class="card-icon" alt="Fireflies">
+                    <div class="card-content">
+                        <div class="card-title">3. Fireflies</div>
+                        <div class="card-desc">“Fireflies" moves on to the night as the kids lay down beside the bonfire and look at the sky.</div>
+                    </div>
+                </div>
+                <div class="vertical-card">
+                    <img src="sunsetbird/4. a dance.png" class="card-icon" alt="A Dance">
+                    <div class="card-content">
+                        <div class="card-title">4. A Dance</div>
+                        <div class="card-desc">"A Dance" peeks into the main character's restless and imaginative mind as they begin to fall asleep.</div>
+                    </div>
+                </div>
+                <div class="vertical-card">
+                    <img src="sunsetbird/5. a dream.png" class="card-icon" alt="A Dream">
+                    <div class="card-content">
+                        <div class="card-title">5. A Dream</div>
+                        <div class="card-desc">"Dreams" goes into the more gloomy and uncomfortable memories that can occur during the night.</div>
+                    </div>
+                </div>
+                <div class="vertical-card">
+                    <img src="sunsetbird/intermission.png" class="card-icon" alt="Intermission">
+                    <div class="card-content">
+                        <div class="card-title">Intermission (10 min.)</div>
+                        <div class="card-desc">A short break before the second half.</div>
+                    </div>
+                </div>
+                <div class="vertical-card">
+                    <img src="sunsetbird/6. morning.png" class="card-icon" alt="Morning">
+                    <div class="card-content">
+                        <div class="card-title">6. Morning</div>
+                        <div class="card-desc">"Morning" follows the main character's morning routine as they prepare for school.</div>
+                    </div>
+                </div>
+                <div class="vertical-card">
+                    <img src="sunsetbird/7. playground.png" class="card-icon" alt="Playground">
+                    <div class="card-content">
+                        <div class="card-title">7. Playground</div>
+                        <div class="card-desc">"Playground" involves the main character getting picked on as they arrive at school.</div>
+                    </div>
+                </div>
+                <div class="vertical-card">
+                    <img src="sunsetbird/8. classroom.png" class="card-icon" alt="Classroom">
+                    <div class="card-content">
+                        <div class="card-title">8. Classroom</div>
+                        <div class="card-desc">"Class" depicts a moment of boredom as the main character passively listens to the teacher and doodles in their notebook.</div>
+                    </div>
+                </div>
+                <div class="vertical-card">
+                    <img src="sunsetbird/9. a letter.png" class="card-icon" alt="A Letter">
+                    <div class="card-content">
+                        <div class="card-title">9. A Letter</div>
+                        <div class="card-desc">"A Letter" presents a message (graciously delivered via paper airplane) from someone the main character starts to grow fond of.</div>
+                    </div>
+                </div>
+                <div class="vertical-card">
+                    <img src="sunsetbird/10. town.png" class="card-icon" alt="Town">
+                    <div class="card-content">
+                        <div class="card-title">10. Town</div>
+                        <div class="card-desc">"Town" concludes the suite with school ending and the main character going back into town to play with their newly-made friends.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="sunset-footer">Thank you for Coming.</div>
+    </main>
+    <script>
+                // Performer modal logic
+                function showPerformerModal(name, role, bio, imgSrc) {
+                    document.getElementById('modalName').textContent = name;
+                    document.getElementById('modalRole').textContent = role;
+                    document.getElementById('modalBio').textContent = bio;
+                    document.getElementById('modalImg').src = imgSrc;
+                    document.getElementById('performerModalBg').classList.add('active');
+                }
+                function closePerformerModal() {
+                    document.getElementById('performerModalBg').classList.remove('active');
+                }
+        // Seagull blink animation
+        const seagullImg = document.getElementById('seagullImg');
+        let blinkTimeout;
+        function blinkSeagull() {
+            const blinkDelay = Math.random() * 1200 + 600; // 0.6-1.8 seconds
+            blinkTimeout = setTimeout(() => {
+                seagullImg.src = 'sunsetbird/seagullanim2.png';
+                setTimeout(() => {
+                    seagullImg.src = 'sunsetbird/seagullanim1.png';
+                    blinkSeagull();
+                }, 120);
+            }, blinkDelay);
+        }
+        blinkSeagull();
+        // Tab switching
+        document.getElementById('notesTab').onclick = function() {
+            this.classList.add('active');
+            document.getElementById('performersTab').classList.remove('active');
+            document.getElementById('notesContent').style.display = '';
+            document.getElementById('performersContent').style.display = 'none';
+        };
+        document.getElementById('performersTab').onclick = function() {
+            this.classList.add('active');
+            document.getElementById('notesTab').classList.remove('active');
+            document.getElementById('notesContent').style.display = 'none';
+            document.getElementById('performersContent').style.display = '';
+        };
+    </script>
+</body>
+</html>

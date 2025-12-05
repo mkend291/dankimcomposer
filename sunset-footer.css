@@ -1,0 +1,10 @@
+/* Added sunset-footer style to match 'Welcome to' */
+.sunset-footer {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+    color: #111;
+    font-family: 'Quicksand', 'Nunito', 'Avenir', sans-serif;
+    font-weight: bold;
+}

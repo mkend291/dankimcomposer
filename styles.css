@@ -1,3 +1,48 @@
+/* Vertical Cards Styles */
+.vertical-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    width: 100%;
+    max-width: 600px;
+    margin: 2rem auto;
+}
+.vertical-card {
+    display: flex;
+    align-items: center;
+    background: #f7fbff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 1rem 1.5rem;
+    transition: box-shadow 0.2s;
+}
+.vertical-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+.card-icon {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 0;
+    margin-right: 1.2rem;
+    background: none;
+    border: none;
+    padding: 0;
+}
+.card-content {
+    display: flex;
+    flex-direction: column;
+}
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 0.3rem;
+}
+.card-desc {
+    font-size: 1rem;
+    color: #444;
+}
 * {
     margin: 0;
     padding: 0;
@@ -12,8 +57,11 @@ body {
     font-family: 'Avenir', 'Avenir Next', sans-serif;
     line-height: 1.6;
     color: #e0e0e0;
-    background-color: #060620;
+    background: linear-gradient(135deg, #060620 0%, #1a1f3a 100%);
     letter-spacing: 0.01em;
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 /* Navigation Styles */
@@ -133,6 +181,8 @@ main {
     border-radius: 8px;
     margin-bottom: 2rem;
     border: 1px solid #1a1f3a;
+    overflow: hidden;
+}
 }
 
 .hero-content {
@@ -150,14 +200,16 @@ main {
 
 .hero-header h1 {
     font-size: 5.5rem;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.7rem;
     letter-spacing: 0.15em;
 }
 
-.hero .subtitle {
+ .hero .subtitle {
     font-size: 2.2rem;
     font-weight: 300;
     letter-spacing: 0.05em;
+    margin-top: 0;
+    margin-bottom: 0.7rem;
 }
 
 .hero-bottom {
@@ -1574,15 +1626,25 @@ footer {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.1rem;
+    }
+    .logo {
+        margin-bottom: 0.1rem;
+        text-align: center;
+    }
     .nav-menu {
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
         gap: 1rem;
     }
-
     .nav-link {
         font-size: 0.9rem;
         padding: 0.4rem 0.5rem;
     }
-
     .dropdown .nav-link {
         display: flex;
         align-items: center;
@@ -1592,6 +1654,21 @@ footer {
     .hero-bottom {
         flex-direction: column;
         gap: 2rem;
+    }
+    .hero-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .hero-header h1 {
+        margin-bottom: 0.7rem;
+    }
+    .hero .subtitle {
+        margin-top: 0;
+        margin-bottom: 0.7rem;
+        padding: 0;
+        font-size: 1.3rem;
     }
 
     .hero-header h1 {
