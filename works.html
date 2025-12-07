@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Works - DANIEL KIM</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" class="logo">DANIEL KIM</a>
+            <a href="index.html" class="logo">DANIEL S. KIM</a>
             <ul class="nav-menu">
                 <li><a href="index.html" class="nav-link">Home</a></li>
                 <li><a href="works.html" class="nav-link active">Works</a></li>
@@ -29,7 +30,7 @@
 
     <main>
         <section class="content">
-            <h1>Works</h1>
+            <h1>WORKS</h1>
             <p id="works-stats">Loading...</p>
             
             <!-- Year Navigation -->
@@ -63,7 +64,7 @@
             <div id="work-request-overlay" class="request-overlay">
                 <div class="request-form-container">
                     <button class="close-btn" onclick="closeWorkRequestForm()">&times;</button>
-                    <h2 id="work-form-title">Request Work</h2>
+                    <h2 id="work-form-title">REQUEST WORK</h2>
                     <form id="work-request-form" onsubmit="submitWorkRequest(event)">
                         <input type="hidden" id="work-title" name="work-title">
                         
@@ -95,7 +96,7 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 Daniel Kim. All rights reserved.</p>
+        <p>&copy; 2025 Daniel S. Kim. All rights reserved.</p>
     </footer>
 
     <script>
@@ -365,20 +366,20 @@
                 <div class="year-container">
                     <div class="works-list">
                         ${filteredWorks.map((work, index) => {
-                            const colors = ['#6a9955', '#d4a959', '#ce9178', '#c586c0', '#4ec9b0', '#569cd6'];
-                            const colorClass = `work-color-${index % colors.length}`;
+                            // Alternate between two color classes
+                            const colorClass = `work-color-${index % 2}`;
                             return `
                             <div class="work-item ${colorClass}">
                                 <div class="work-main">
                                     <div class="work-info">
-                                        <h3>${work.title || ''}</h3>
+                                        <h3>${work.title ? work.title.toUpperCase() : ''}</h3>
                                         <p class="work-instrumentation">${work.instruments || ''}${work.duration && work.duration.trim() ? ' (' + work.duration + ' min)' : ''}</p>
                                     </div>
                                     <div class="work-actions">
-                                        ${work.description && work.description.trim() ? `<button class="action-btn description-btn" onclick="toggleDescription(this.closest('.work-item'))">Info</button>` : ''}
-                                        ${work.scoreLink && work.scoreLink.trim() ? `<a href="${work.scoreLink}" target="_blank" class="action-btn score-btn">Score</a>` : ''}
-                                        ${(work.videoLink && work.videoLink.trim()) || (work.playlist && work.playlist.trim()) ? `<a href="${work.videoLink && work.videoLink.trim() ? work.videoLink : work.playlist}" target="_blank" class="action-btn video-btn">Video</a>` : ''}
-                                        ${!work.scoreLink || !work.scoreLink.trim() ? `<button class="action-btn request-btn" onclick="openWorkRequestForm('${work.title.replace(/'/g, "\\'")}')">Request</button>` : ''}
+                                        ${work.description && work.description.trim() ? `<button class="action-btn description-btn" onclick="toggleDescription(this.closest('.work-item'))"><i class='fa-solid fa-circle-info'></i> Info</button>` : ''}
+                                        ${work.scoreLink && work.scoreLink.trim() ? `<a href="${work.scoreLink}" target="_blank" class="action-btn score-btn">Request</a>` : ''}
+                                        ${(work.videoLink && work.videoLink.trim()) || (work.playlist && work.playlist.trim()) ? `<a href="${work.videoLink && work.videoLink.trim() ? work.videoLink : work.playlist}" target="_blank" class="action-btn video-btn"><i class='fab fa-youtube'></i> Video</a>` : ''}
+                                        ${!work.scoreLink || !work.scoreLink.trim() ? `<button class="action-btn request-btn" onclick="openWorkRequestForm('${work.title.replace(/'/g, "\\'")}')"><i class='fa-solid fa-envelope'></i> Request</button>` : ''}
                                     </div>
                                 </div>
                                 ${work.description && work.description.trim() ? `<div class="work-description" style="display: none;">${work.description}</div>` : ''}

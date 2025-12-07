@@ -10,7 +10,7 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" class="logo">DANIEL KIM</a>
+            <a href="index.html" class="logo">DANIEL S. KIM</a>
             <ul class="nav-menu">
                 <li><a href="index.html" class="nav-link">Home</a></li>
                 <li><a href="works.html" class="nav-link">Works</a></li>
@@ -30,7 +30,7 @@
 
     <main>
         <section class="content">
-            <h1>Events</h1>
+            <h1>EVENTS</h1>
             
             <div id="events-container">
                 <p style="color: #7db8ff;">Loading events...</p>
@@ -39,7 +39,7 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 Daniel Kim. All rights reserved.</p>
+        <p>&copy; 2025 Daniel S. Kim. All rights reserved.</p>
     </footer>
 
     <script>
@@ -144,7 +144,7 @@
                             <div class="timeline-item">
                                 <div class="timeline-marker ${colorClass}"><span class="material-icons">music_note</span></div>
                                 <div class="timeline-content ${colorClass}">
-                                    <h3>${event.title}</h3>
+                                    <h3>${event.title ? event.title.toUpperCase() : ''}</h3>
                                     ${event.date ? `<p style="margin: 0.25rem 0;"><strong>Date:</strong> ${formatDate(event.date)}</p>` : ''}
                                     ${event.performer ? `<p style="margin: 0.25rem 0;"><strong>Performers:</strong> ${event.performer}</p>` : ''}
                                     ${event.location ? `<p style="margin: 0.25rem 0;"><strong>Location:</strong> ${event.location}</p>` : ''}
