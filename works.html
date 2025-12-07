@@ -30,12 +30,13 @@
 
     <main>
         <section class="content">
-            <h1>WORKS</h1>
-            <p id="works-stats">Loading...</p>
-            
-            <!-- Year Navigation -->
-            <div id="year-navigation"></div>
-            
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;">
+                <h1 style="margin-bottom: 0;">WORKS</h1>
+            </div>
+            <p id="works-stats" style="margin-top: 0.25rem; margin-bottom: 0.5rem;">Loading...</p>
+            <div style="margin-bottom: 0.5rem;">
+                <input type="text" id="works-search" placeholder="Search by title, instrument, or year" style="width: 100%; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #569cd6; font-size: 1rem;">
+            </div>
             <!-- Filters -->
             <div class="filters">
                 <div class="filter-group">
@@ -157,69 +158,31 @@
             }
         }
         
-        let currentYear = null;
-        let worksByYear = {};
-        let years = [];
+        let allWorks = [];
         
         // Load works from CSV
-        fetch('WebsiteWorks.csv', {
-            cache: 'no-store'
-        })
+        fetch('WebsiteWorks.csv', { cache: 'no-store' })
             .then(response => response.text())
             .then(csvText => {
-                const allWorks = [];
-                
-                // Split into lines but respect quoted fields with newlines
                 function parseCSV(text) {
-                    const result = [];
                     const rows = [];
-                    let currentField = '';
-                    let currentRow = [];
-                    let insideQuotes = false;
-                    
+                    let currentField = '', currentRow = [], insideQuotes = false;
                     for (let i = 0; i < text.length; i++) {
-                        const char = text[i];
-                        const nextChar = text[i + 1];
-                        
-                        if (char === '"' && nextChar === '"' && insideQuotes) {
-                            // Escaped quote
-                            currentField += '"';
-                            i++; // Skip next quote
-                        } else if (char === '"') {
-                            insideQuotes = !insideQuotes;
-                        } else if (char === ',' && !insideQuotes) {
-                            currentRow.push(currentField);
-                            currentField = '';
-                        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
-                            if (char === '\r' && nextChar === '\n') {
-                                i++; // Skip \n in \r\n
-                            }
-                            if (currentField || currentRow.length > 0) {
-                                currentRow.push(currentField);
-                                rows.push(currentRow);
-                                currentRow = [];
-                                currentField = '';
-                            }
-                        } else {
-                            currentField += char;
-                        }
+                        const char = text[i], nextChar = text[i + 1];
+                        if (char === '"' && nextChar === '"' && insideQuotes) { currentField += '"'; i++; }
+                        else if (char === '"') { insideQuotes = !insideQuotes; }
+                        else if (char === ',' && !insideQuotes) { currentRow.push(currentField); currentField = ''; }
+                        else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                            if (char === '\r' && nextChar === '\n') i++;
+                            if (currentField || currentRow.length > 0) { currentRow.push(currentField); rows.push(currentRow); currentRow = []; currentField = ''; }
+                        } else { currentField += char; }
                     }
-                    
-                    // Push last field and row if exists
-                    if (currentField || currentRow.length > 0) {
-                        currentRow.push(currentField);
-                        rows.push(currentRow);
-                    }
-                    
+                    if (currentField || currentRow.length > 0) { currentRow.push(currentField); rows.push(currentRow); }
                     return rows;
                 }
-                
                 const rows = parseCSV(csvText);
-                
-                // Skip first 2 rows (title and header)
                 for (let i = 2; i < rows.length; i++) {
                     const values = rows[i];
-                    
                     if (values[0] === 'PUBLISHED' && values.length >= 8) {
                         const work = {
                             status: values[0] || '',
@@ -231,7 +194,7 @@
                             orderDate: values[6] || '',
                             year: values[7] || (values[6] ? new Date(values[6]).getFullYear().toString() : ''),
                             videoLink: values[8] || '',
-                            scoreLink: values[9] || '',
+                            buyLink: values[9] || '',
                             movements: values[10] || '',
                             commission: values[11] || '',
                             playlist: values[12] || '',
@@ -240,45 +203,8 @@
                         allWorks.push(work);
                     }
                 }
-                
-                // Group works by year
-                allWorks.forEach(work => {
-                    const year = work.year || 'Unknown';
-                    if (!worksByYear[year]) {
-                        worksByYear[year] = [];
-                    }
-                    worksByYear[year].push(work);
-                });
-                
-                // Sort each year's works by date
-                Object.keys(worksByYear).forEach(year => {
-                    worksByYear[year].sort((a, b) => {
-                        const dateA = new Date(a.orderDate);
-                        const dateB = new Date(b.orderDate);
-                        return dateB - dateA;
-                    });
-                });
-                
-                // Get sorted years (most recent first)
-                years = Object.keys(worksByYear).sort((a, b) => {
-                    if (a === 'Unknown') return 1;
-                    if (b === 'Unknown') return -1;
-                    return parseInt(b) - parseInt(a);
-                });
-                
-                // Set initial year
-                currentYear = years[0];
-                
-                // Calculate and display stats
-                const totalWorks = allWorks.length;
-                const totalMinutes = allWorks.reduce((sum, work) => {
-                    const duration = parseFloat(work.duration) || 0;
-                    return sum + duration;
-                }, 0);
-                const totalHours = (totalMinutes / 60).toFixed(1);
-                
-                document.getElementById('works-stats').textContent = `${totalWorks} works • ${totalHours} hours of music`;
-                
+                // Sort all works by date (most recent first)
+                allWorks.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
                 // Populate instrument filter
                 const instrumentTags = new Set();
                 allWorks.forEach(work => {
@@ -290,7 +216,6 @@
                         }
                     });
                 });
-                
                 const instrumentFilter = document.getElementById('instrument-filter');
                 Array.from(instrumentTags).sort().forEach(tag => {
                     const option = document.createElement('option');
@@ -298,117 +223,82 @@
                     option.textContent = tag;
                     instrumentFilter.appendChild(option);
                 });
-                
-                // Display navigation
-                displayNavigation();
-                
-                // Display works for current year
-                displayYear(currentYear);
+                // Calculate and display stats
+                const totalWorks = allWorks.length;
+                const totalMinutes = allWorks.reduce((sum, work) => sum + (parseFloat(work.duration) || 0), 0);
+                const totalHours = (totalMinutes / 60).toFixed(1);
+                document.getElementById('works-stats').textContent = `${totalWorks} works • ${totalHours} hours of music`;
+                // Display all works
+                displayWorks();
             })
             .catch(error => {
                 console.error('Error loading works:', error);
                 document.getElementById('works-container').innerHTML = '<p>Unable to load works.</p>';
             });
         
-        function displayNavigation() {
-            const nav = document.getElementById('year-navigation');
-            const currentIndex = years.indexOf(currentYear);
-            
-            nav.innerHTML = `
-                <div class="year-nav">
-                    <button class="nav-btn" onclick="prevYear()" ${currentIndex === 0 ? 'disabled' : ''}>← Previous</button>
-                    <span class="year-display">${currentYear}</span>
-                    <button class="nav-btn" onclick="nextYear()" ${currentIndex === years.length - 1 ? 'disabled' : ''}>Next →</button>
-                </div>
-            `;
-        }
-        
-        function displayYear(year) {
-            const works = worksByYear[year];
+        function displayWorks() {
             const container = document.getElementById('works-container');
-            
-            if (!works || works.length === 0) {
-                container.innerHTML = '<p>No works for this year.</p>';
-                return;
-            }
-            
-            // Apply filters
             const typeFilter = document.getElementById('type-filter').value;
             const instrumentFilter = document.getElementById('instrument-filter').value;
-            
-            const filteredWorks = works.filter(work => {
+            const searchTerm = document.getElementById('works-search').value.trim().toLowerCase();
+            let filteredWorks = allWorks.filter(work => {
                 // Parse instrument tags
                 const tags = work.instrumentTags.replace(/[\[\]]/g, '').split(',').map(t => t.trim());
-                
                 // Type filter
                 const isMediaMusic = tags.some(tag => tag.toLowerCase() === 'media music');
                 const arrangementValue = work.isArrangement ? work.isArrangement.replace(/[\[\]]/g, '').trim().toLowerCase() : '';
                 const isArrangement = arrangementValue === 'arrangement';
-                
                 if (typeFilter === 'concert' && (isMediaMusic || isArrangement)) return false;
                 if (typeFilter === 'media' && (!isMediaMusic || isArrangement)) return false;
                 if (typeFilter === 'arrangement' && !isArrangement) return false;
-                
                 // Instrument filter
                 if (instrumentFilter !== 'all') {
                     if (!tags.includes(instrumentFilter)) return false;
                 }
-                
+                // Search filter
+                if (searchTerm) {
+                    const inTitle = work.title && work.title.toLowerCase().includes(searchTerm);
+                    const inDesc = work.description && work.description.toLowerCase().includes(searchTerm);
+                    const inInstr = work.instruments && work.instruments.toLowerCase().includes(searchTerm);
+                    if (!inTitle && !inDesc && !inInstr) return false;
+                }
                 return true;
             });
-            
             if (filteredWorks.length === 0) {
                 container.innerHTML = '<p>No works match the selected filters.</p>';
                 return;
             }
-            
             container.innerHTML = `
-                <div class="year-container">
-                    <div class="works-list">
-                        ${filteredWorks.map((work, index) => {
-                            // Alternate between two color classes
-                            const colorClass = `work-color-${index % 2}`;
-                            return `
-                            <div class="work-item ${colorClass}">
-                                <div class="work-main">
-                                    <div class="work-info">
-                                        <h3>${work.title ? work.title.toUpperCase() : ''}</h3>
-                                        <p class="work-instrumentation">${work.instruments || ''}${work.duration && work.duration.trim() ? ' (' + work.duration + ' min)' : ''}</p>
-                                    </div>
-                                    <div class="work-actions">
-                                        ${work.description && work.description.trim() ? `<button class="action-btn description-btn" onclick="toggleDescription(this.closest('.work-item'))"><i class='fa-solid fa-circle-info'></i> Info</button>` : ''}
-                                        ${work.scoreLink && work.scoreLink.trim() ? `<a href="${work.scoreLink}" target="_blank" class="action-btn score-btn">Request</a>` : ''}
-                                        ${(work.videoLink && work.videoLink.trim()) || (work.playlist && work.playlist.trim()) ? `<a href="${work.videoLink && work.videoLink.trim() ? work.videoLink : work.playlist}" target="_blank" class="action-btn video-btn"><i class='fab fa-youtube'></i> Video</a>` : ''}
-                                        ${!work.scoreLink || !work.scoreLink.trim() ? `<button class="action-btn request-btn" onclick="openWorkRequestForm('${work.title.replace(/'/g, "\\'")}')"><i class='fa-solid fa-envelope'></i> Request</button>` : ''}
+                <div class="works-list">
+                    ${filteredWorks.map((work, index) => {
+                        const colorClass = `work-color-${index % 2}`;
+                        return `
+                        <div class="work-item ${colorClass}">
+                            <div class="work-main">
+                                <div class="work-info">
+                                    <h3>${work.title ? work.title.toUpperCase() : ''}</h3>
+                                    <div class="work-instrumentation" style="font-weight: normal; font-family: inherit;">${work.instruments || ''}</div>
+                                    <div class="work-meta" style="font-weight: normal; font-family: inherit; color: #cccccc;">
+                                        ${work.year ? `<span class='work-year-text' style='font-weight: normal;'>${work.year}</span>` : ''}
+                                        ${(work.year && work.duration) ? ' • ' : ''}
+                                        ${work.duration && work.duration.trim() ? `${work.duration} min` : ''}
                                     </div>
                                 </div>
-                                ${work.description && work.description.trim() ? `<div class="work-description" style="display: none;">${work.description}</div>` : ''}
+                                <div class="work-actions">
+                                    ${work.description && work.description.trim() ? `<button class="action-btn description-btn" onclick="toggleDescription(this.closest('.work-item'))"><i class='fa-solid fa-circle-info'></i> Info</button>` : ''}
+                                    ${(work.videoLink && work.videoLink.trim()) || (work.playlist && work.playlist.trim()) ? `<a href="${work.videoLink && work.videoLink.trim() ? work.videoLink : work.playlist}" target="_blank" class="action-btn video-btn"><i class='fab fa-youtube'></i> Video</a>` : ''}
+                                    ${work.buyLink && work.buyLink.trim() ? `<a href="${work.buyLink}" target="_blank" class="action-btn score-btn"><i class='fa-solid fa-dollar-sign'></i> Purchase</a>` : ''}
+                                    ${!work.buyLink || !work.buyLink.trim() ? `<button class="action-btn request-btn" onclick="openWorkRequestForm('${work.title.replace(/'/g, "\\'")}')"><i class='fa-solid fa-envelope'></i> Request</button>` : ''}
+                                </div>
                             </div>
-                        `}).join('')}
-                    </div>
+                            ${work.description && work.description.trim() ? `<div class="work-description" style="display: none;">${work.description}</div>` : ''}
+                        </div>
+                    `}).join('')}
                 </div>
             `;
         }
-        
-        function prevYear() {
-            const currentIndex = years.indexOf(currentYear);
-            if (currentIndex > 0) {
-                currentYear = years[currentIndex - 1];
-                displayNavigation();
-                displayYear(currentYear);
-            }
-        }
-        
-        function nextYear() {
-            const currentIndex = years.indexOf(currentYear);
-            if (currentIndex < years.length - 1) {
-                currentYear = years[currentIndex + 1];
-                displayNavigation();
-                displayYear(currentYear);
-            }
-        }
-        
-        function applyFilters() {
-            displayYear(currentYear);
-        }
+        // Update works on filter/search
+        document.getElementById('type-filter').addEventListener('change', displayWorks);
+        document.getElementById('instrument-filter').addEventListener('change', displayWorks);
+        document.getElementById('works-search').addEventListener('input', displayWorks);
     </script>

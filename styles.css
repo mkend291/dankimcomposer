@@ -1,3 +1,7 @@
+/* Ensure purchase button text is white */
+.score-btn {
+    color: #fff !important;
+}
 .description-btn {
     background-color: #569cd6 !important;
     color: #fff !important;
