@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Music - DANIEL KIM</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">DANIEL S. KIM</a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="works.html" class="nav-link">Works</a></li>
+                <li><a href="requests.html" class="nav-link">Requests</a></li>
+                <li><a href="media-music.html" class="nav-link active">Media Music</a></li>
+                <li class="dropdown">
+                    <a href="#" class="nav-link">More ▾</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="events.html" class="dropdown-link">Events</a></li>
+                        <li><a href="converter.html" class="dropdown-link">Text to Music Converter</a></li>
+                        <li><a href="chord-progression.html" class="dropdown-link">Chord Progression Generator</a></li>
+                        <li><a href="sunset-bird.html" class="dropdown-link">Sunset Bird</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="content">
+            <h1>GENRE REELS</h1>
+            <div class="requests-list media-reels-grid" id="reels-container"></div>
+        </section>
+        <section class="content">
+            <h1>CUSTOM REELS</h1>
+            <div class="requests-list media-reels-grid" id="custom-reels-list"></div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Daniel S. Kim. All rights reserved.</p>
+    </footer>
+    <script>
+        // Fetch and parse works
+        fetch('WebsiteWorks.csv', { cache: 'no-store' })
+            .then(response => response.text())
+            .then(csvText => {
+                function parseCSV(text) {
+                    const rows = [];
+                    let currentField = '', currentRow = [], insideQuotes = false;
+                    for (let i = 0; i < text.length; i++) {
+                        const char = text[i], nextChar = text[i + 1];
+                        if (char === '"' && nextChar === '"' && insideQuotes) { currentField += '"'; i++; }
+                        else if (char === '"') { insideQuotes = !insideQuotes; }
+                        else if (char === ',' && !insideQuotes) { currentRow.push(currentField); currentField = ''; }
+                        else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                            if (char === '\r' && nextChar === '\n') i++;
+                            if (currentField || currentRow.length > 0) { currentRow.push(currentField); rows.push(currentRow); currentRow = []; currentField = ''; }
+                        } else { currentField += char; }
+                    }
+                    if (currentField || currentRow.length > 0) { currentRow.push(currentField); rows.push(currentRow); }
+                    return rows;
+                }
+                const rows = parseCSV(csvText);
+                if (!rows || rows.length < 2) return;
+                const headerRow = rows[0];
+                const works = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const values = rows[i];
+                    if (values[0] === 'PUBLISHED') {
+                        const work = {};
+                        for (let j = 0; j < headerRow.length; j++) {
+                            work[headerRow[j]?.trim() || `col${j}`] = values[j] || '';
+                        }
+                        works.push(work);
+                    }
+                }
+                // GENRE REELS: Only media music works, grouped by genreTag
+                const mediaWorks = works.filter(work => {
+                    const tags = (work['InstrumentTags'] || '').replace(/\[|\]/g, '').split(',').map(t => t.trim().toLowerCase());
+                    return tags.includes('media music');
+                });
+                const genreMap = {};
+                mediaWorks.forEach(work => {
+                    const genreTags = (work['genreTag'] || '').split(',').map(t => t.trim()).filter(Boolean);
+                    genreTags.forEach(tag => {
+                        if (!genreMap[tag]) genreMap[tag] = [];
+                        genreMap[tag].push(work);
+                    });
+                });
+                const container = document.getElementById('reels-container');
+                container.innerHTML = Object.keys(genreMap).sort().map(tag => {
+                    const count = genreMap[tag].length;
+                    return `<div class="request-item media-reel-card">
+                        <h3>${tag} Reel</h3>
+                        <p>${count} track${count !== 1 ? 's' : ''}</p>
+                        <button class="reel-btn" onclick="window.location.href='genre-reel.html?tag=${encodeURIComponent(tag)}'">View Reel</button>
+                    </div>`;
+                }).join('');
+
+                // CUSTOM REELS: All media music (any tag)
+                const allMediaMusicCount = mediaWorks.length;
+                document.getElementById('custom-reels-list').innerHTML = `
+                    <div class="request-item media-reel-card">
+                        <h3>All Media Music</h3>
+                        <p>${allMediaMusicCount} track${allMediaMusicCount !== 1 ? 's' : ''}</p>
+                        <button class="reel-btn" onclick="window.location.href='genre-reel.html'">View Reel</button>
+                    </div>
+                    <div class="request-item media-reel-card">
+                        <h3>Build Custom Reel</h3>
+                        <p>Select tracks to create your own playlist</p>
+                        <button class="reel-btn" onclick="window.location.href='build-custom-reel.html'">Start Building</button>
+                    </div>
+                `;
+            });
+        // Placeholder for View Reel button
+        function viewReel(tag) {
+            alert('Show reel for: ' + decodeURIComponent(tag));
+        }
+    </script>
+</body>
+</html>

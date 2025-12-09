@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <script src="https://unpkg.com/wavesurfer.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Reel</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">DANIEL S. KIM</a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="works.html" class="nav-link">Works</a></li>
+                <li><a href="requests.html" class="nav-link">Requests</a></li>
+                <li><a href="media-music.html" class="nav-link">Media Music</a></li>
+                <li class="dropdown">
+                    <a href="#" class="nav-link">More ▾</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="events.html" class="dropdown-link">Events</a></li>
+                        <li><a href="converter.html" class="dropdown-link">Text to Music Converter</a></li>
+                        <li><a href="chord-progression.html" class="dropdown-link">Chord Progression Generator</a></li>
+                        <li><a href="sunset-bird.html" class="dropdown-link">Sunset Bird</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <main>
+        <section class="content">
+            <h1 id="reel-title">Media Reel</h1>
+            <div id="reel-tracks" class="audio-playlist"></div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Daniel S. Kim. All rights reserved.</p>
+    </footer>
+    <script>
+    // Get tag or custom from URL
+    function getURLParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            tag: params.get('tag') || '',
+            custom: params.get('custom') || ''
+        };
+    }
+    function capitalizeWords(str) {
+        return str.replace(/\b\w/g, c => c.toUpperCase());
+    }
+    const { tag, custom } = getURLParams();
+    let customTitles = [];
+    if (custom) {
+        customTitles = custom.split(',').map(s => decodeURIComponent(s));
+        document.title = 'Custom Reel - Media Music';
+        document.getElementById('reel-title').textContent = 'Custom Reel';
+    } else if (tag) {
+        document.title = `${capitalizeWords(tag)} Reel - Media Music`;
+        document.getElementById('reel-title').textContent = `${capitalizeWords(tag)} Reel`;
+    } else {
+        document.title = 'All Media Music - Media Music';
+        document.getElementById('reel-title').textContent = 'All Media Music';
+    }
+    fetch('WebsiteWorks.csv', { cache: 'no-store' })
+        .then(response => response.text())
+        .then(csvText => {
+            function parseCSV(text) {
+                const rows = [];
+                let currentField = '', currentRow = [], insideQuotes = false;
+                for (let i = 0; i < text.length; i++) {
+                    const char = text[i], nextChar = text[i + 1];
+                    if (char === '"' && nextChar === '"' && insideQuotes) { currentField += '"'; i++; }
+                    else if (char === '"') { insideQuotes = !insideQuotes; }
+                    else if (char === ',' && !insideQuotes) { currentRow.push(currentField); currentField = ''; }
+                    else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                        if (char === '\r' && nextChar === '\n') i++;
+                        if (currentField || currentRow.length > 0) { currentRow.push(currentField); rows.push(currentRow); currentRow = []; currentField = ''; }
+                    } else { currentField += char; }
+                }
+                if (currentField || currentRow.length > 0) { currentRow.push(currentField); rows.push(currentRow); }
+                return rows;
+            }
+            const rows = parseCSV(csvText);
+            if (rows.length < 2) return;
+            const headerRow = rows[0];
+            const works = [];
+            for (let i = 1; i < rows.length; i++) {
+                const values = rows[i];
+                if (values[0] === 'PUBLISHED') {
+                    const work = {};
+                    for (let j = 0; j < headerRow.length; j++) {
+                        work[headerRow[j]?.trim() || `col${j}`] = values[j] || '';
+                    }
+                    works.push(work);
+                }
+            }
+            // Only media music works with this tag or custom selection
+            let filtered;
+            if (customTitles.length > 0) {
+                filtered = works.filter(work => {
+                    const tags = (work['InstrumentTags'] || '').replace(/\[|\]/g, '').split(',').map(t => t.trim().toLowerCase());
+                    return tags.includes('media music') && customTitles.includes(work['Title']);
+                });
+            } else if (tag) {
+                filtered = works.filter(work => {
+                    const tags = (work['InstrumentTags'] || '').replace(/\[|\]/g, '').split(',').map(t => t.trim().toLowerCase());
+                    if (!tags.includes('media music')) return false;
+                    const genreTags = (work['genreTag'] || '').split(',').map(t => t.trim().toLowerCase());
+                    return genreTags.includes(tag.toLowerCase());
+                });
+            } else {
+                filtered = works.filter(work => {
+                    const tags = (work['InstrumentTags'] || '').replace(/\[|\]/g, '').split(',').map(t => t.trim().toLowerCase());
+                    return tags.includes('media music');
+                });
+            }
+            // Sort by OrderDate (recent to oldest)
+            filtered = filtered.sort((a, b) => {
+                const da = new Date(a['OrderDate'] || '1970-01-01');
+                const db = new Date(b['OrderDate'] || '1970-01-01');
+                return db - da;
+            });
+            // Case-sensitive check for mediaName
+            filtered.forEach(work => {
+                if (work['mediaName'] && typeof work['mediaName'] === 'string') {
+                    // Only use exact case match for mediaName
+                    const fileName = work['mediaName'].trim();
+                    // If you want to validate against a list, do it here
+                    work['mediaName'] = fileName;
+                }
+            });
+            const container = document.getElementById('reel-tracks');
+            if (filtered.length === 0) {
+                container.innerHTML = '<p>No tracks found for this reel.</p>';
+                return;
+            }
+            container.innerHTML = `
+                <div class="playlist-cards organized">
+                    ${filtered.map((work, idx) => `
+                        <div class="playlist-card organized">
+                            <div class="track-row">
+                                <div class="track-info">
+                                    <span class="track-title">${work['Title'] || ''}</span>
+                                    <span class="track-genre">${work['genreTag'] || ''}</span>
+                                </div>
+                                <div class="track-audio">
+                                    ${work['mediaName'] && work['mediaName'].trim() ? `
+                                        <div class='wavesurfer-ui' data-idx='${idx}' style='width:100%;'>
+                                            <button class='ws-play ws-btn' id='ws-play-${idx}' title='Play/Pause' style='background:none;border:none;outline:none;cursor:pointer;width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;'>
+                                                <span class='ws-icon' id='ws-icon-${idx}' style='display:inline-block;width:24px;height:24px;'>
+                                                    <svg viewBox="0 0 24 24" fill="#fff" width="24" height="24"><polygon points="6,4 20,12 6,20"/></svg>
+                                                </span>
+                                            </button>
+                                            <div class='waveform' id='waveform-${idx}' style='width:70%;height:48px;display:inline-block;vertical-align:middle;'></div>
+                                            <span class='ws-time' id='ws-time-${idx}' style='margin-left:0.7em;font-size:0.98em;min-width:70px;display:inline-block;'>0:00 / 0:00</span>
+                                            <div class='ws-vol-wrap' style='position:relative;display:inline-block;margin-left:0.7em;'>
+                                                <button class='ws-vol-btn' id='ws-vol-btn-${idx}' title='Volume' style='background:none;border:none;outline:none;cursor:pointer;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;'>
+                                                    <span class='ws-vol-icon' id='ws-vol-icon-${idx}' style='display:inline-block;width:22px;height:22px;'>
+                                                        <svg viewBox="0 0 24 24" fill="#fff" width="22" height="22"><polygon points="3,9 9,9 13,5 13,19 9,15 3,15"/></svg>
+                                                    </span>
+                                                </button>
+                                                <input type='range' min='0' max='1' step='0.01' value='1' class='ws-volume' id='ws-volume-${idx}' title='Volume' style='width:32px;height:90px;display:none;position:absolute;bottom:40px;left:50%;transform:translateX(-50%) rotate(-90deg);z-index:20;background:rgba(34,34,34,0.92);border-radius:8px;padding:0;box-shadow:0 2px 8px rgba(0,0,0,0.18);border:none;outline:none;transition:box-shadow 0.2s;'>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                    ${(!work['mediaName'] || !work['mediaName'].trim()) && (work['Video Link'] && work['Video Link'].trim()) ? `<a href="${work['Video Link']}" target="_blank" class="action-btn video-btn organized"><i class='fab fa-youtube'></i> Watch Video</a>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            // Interactive WaveSurfer.js player for each track
+            const wavesurfers = [];
+            filtered.forEach((work, idx) => {
+                if (work['mediaName'] && work['mediaName'].trim()) {
+                    const audioSrc = `media-music-audio/${work['mediaName'].trim()}`;
+                    const ws = WaveSurfer.create({
+                        container: `#waveform-${idx}`,
+                        waveColor: '#7db8ff',
+                        progressColor: '#f7b267',
+                        height: 48,
+                        responsive: true,
+                        barWidth: 2,
+                        barRadius: 2,
+                        cursorColor: '#fff',
+                        interact: true
+                    });
+                    ws.load(audioSrc);
+                    wavesurfers[idx] = ws;
+                    // Play/Pause button
+                    const playBtn = document.getElementById(`ws-play-${idx}`);
+                    const iconSpan = document.getElementById(`ws-icon-${idx}`);
+                    function setPlayIcon() {
+                        iconSpan.innerHTML = '<svg viewBox="0 0 24 24" fill="#fff" width="24" height="24"><polygon points="6,4 20,12 6,20"/></svg>';
+                    }
+                    function setPauseIcon() {
+                        iconSpan.innerHTML = '<svg viewBox="0 0 24 24" fill="#fff" width="24" height="24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+                    }
+                    setPlayIcon();
+                    playBtn.addEventListener('click', function() {
+                        // Pause all others
+                        wavesurfers.forEach((other, j) => { if (j !== idx && other) other.pause(); });
+                        ws.playPause();
+                    });
+                    ws.on('play', setPauseIcon);
+                    ws.on('pause', setPlayIcon);
+                    // Auto-play on waveform click/seek
+                    ws.on('interaction', () => {
+                        setTimeout(() => {
+                            if (!ws.isPlaying()) {
+                                // Pause all others
+                                wavesurfers.forEach((other, j) => { if (j !== idx && other) other.pause(); });
+                                ws.play();
+                            }
+                        }, 50);
+                    });
+                    // Time display
+                    const timeSpan = document.getElementById(`ws-time-${idx}`);
+                    function formatTime(sec) {
+                        sec = Math.round(sec);
+                        const m = Math.floor(sec / 60);
+                        const s = sec % 60;
+                        return `${m}:${s.toString().padStart(2, '0')}`;
+                    }
+                    ws.on('audioprocess', () => {
+                        if (ws.isPlaying()) {
+                            timeSpan.textContent = `${formatTime(ws.getCurrentTime())} / ${formatTime(ws.getDuration())}`;
+                        }
+                    });
+                    ws.on('ready', () => {
+                        timeSpan.textContent = `0:00 / ${formatTime(ws.getDuration())}`;
+                    });
+                    ws.on('seek', () => {
+                        timeSpan.textContent = `${formatTime(ws.getCurrentTime())} / ${formatTime(ws.getDuration())}`;
+                    });
+                    // Volume slider popup (vertical, native-like)
+                    const volSlider = document.getElementById(`ws-volume-${idx}`);
+                    const volBtn = document.getElementById(`ws-vol-btn-${idx}`);
+                    const volIcon = document.getElementById(`ws-vol-icon-${idx}`);
+                    let volPopupOpen = false;
+                    function updateVolIcon(vol) {
+                        if (vol === 0) {
+                            // Mute
+                            volIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="#fff" width="22" height="22"><polygon points="3,9 9,9 13,5 13,19 9,15 3,15"/><line x1="19" y1="5" x2="5" y2="19" stroke="#fff" stroke-width="2"/></svg>';
+                        } else if (vol > 0 && vol < 0.5) {
+                            // Low
+                            volIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="#fff" width="22" height="22"><polygon points="3,9 9,9 13,5 13,19 9,15 3,15"/><path d="M16 12a2 2 0 0 0-2-2" stroke="#fff" stroke-width="2" fill="none"/></svg>';
+                        } else {
+                            // High
+                            volIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="#fff" width="22" height="22"><polygon points="3,9 9,9 13,5 13,19 9,15 3,15"/><path d="M16 8a6 6 0 0 1 0 8" stroke="#fff" stroke-width="2" fill="none"/></svg>';
+                        }
+                    }
+                    updateVolIcon(1);
+                    volBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (volSlider.style.display === 'none') {
+                            volSlider.style.display = 'block';
+                            volSlider.focus();
+                            volPopupOpen = true;
+                        } else {
+                            volSlider.style.display = 'none';
+                            volPopupOpen = false;
+                        }
+                    });
+                    volBtn.addEventListener('mouseenter', function() {
+                        volSlider.style.display = 'block';
+                        volPopupOpen = true;
+                    });
+                    volBtn.addEventListener('mouseleave', function() {
+                        setTimeout(() => { if (!volSlider.matches(':hover')) { volSlider.style.display = 'none'; volPopupOpen = false; } }, 200);
+                    });
+                    volSlider.addEventListener('mouseleave', function() {
+                        volSlider.style.display = 'none';
+                        volPopupOpen = false;
+                    });
+                    volSlider.addEventListener('input', function() {
+                        ws.setVolume(parseFloat(this.value));
+                        updateVolIcon(parseFloat(this.value));
+                    });
+                    ws.setVolume(1);
+                    // Hide slider when clicking outside
+                    document.addEventListener('click', function(e) {
+                        if (volPopupOpen && !volBtn.contains(e.target) && e.target !== volSlider) {
+                            volSlider.style.display = 'none';
+                            volPopupOpen = false;
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+    <style>
+                        @media (max-width: 700px) {
+                            .playlist-card.organized {
+                                padding: 0.5rem 0.3rem 0.5rem 0.3rem;
+                            }
+                            .track-row {
+                                flex-direction: column !important;
+                                gap: 0.5em;
+                            }
+                            .track-info {
+                                flex-direction: row !important;
+                                justify-content: flex-start;
+                                align-items: center;
+                                gap: 0.7em;
+                                width: 100%;
+                                margin-bottom: 0.2em;
+                            }
+                            .track-title, .track-genre {
+                                font-size: 1em;
+                                max-width: 100%;
+                            }
+                            .track-audio {
+                                flex-direction: row !important;
+                                align-items: center;
+                                justify-content: flex-start;
+                                width: 100%;
+                                gap: 0.5em;
+                            }
+                            .wavesurfer-ui {
+                                width: 100% !important;
+                                display: flex;
+                                flex-direction: row;
+                                align-items: center;
+                                gap: 0.5em;
+                            }
+                            .ws-play.ws-btn {
+                                margin-right: 0.2em;
+                            }
+                            .waveform {
+                                width: 50vw !important;
+                                min-width: 80px;
+                                max-width: 100%;
+                            }
+                            .ws-time {
+                                min-width: 55px;
+                                font-size: 0.95em;
+                            }
+                            .ws-vol-wrap {
+                                margin-left: 0.3em !important;
+                            }
+                        }
+                    .playlist-cards.organized {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.7rem;
+                        width: 100%;
+                        margin-top: 1.2rem;
+                    }
+                    .playlist-card.organized {
+                        background: rgba(86,156,214,0.18);
+                        border-radius: 10px;
+                        box-shadow: 0 1px 4px rgba(86,156,214,0.08);
+                        padding: 0.7rem 1.1rem 0.7rem 1.1rem;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: stretch;
+                        color: #fff;
+                    }
+                    .playlist-card.organized * {
+                        color: #fff !important;
+                    }
+                    .track-row {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: stretch;
+                        gap: 0.3em;
+                        width: 100%;
+                    }
+                    .track-info {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        gap: 1em;
+                        min-width: 0;
+                        width: 100%;
+                        margin-bottom: 0.1em;
+                    }
+                    .track-title {
+                        font-size: 1.08em;
+                        font-weight: 600;
+                        color: #fff;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        max-width: 100%;
+                    }
+                    .track-genre {
+                        font-size: 0.97em;
+                        color: #fff;
+                        font-weight: 500;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        max-width: 100%;
+                    }
+                    .track-audio {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        gap: 0.5em;
+                        width: 100%;
+                        justify-content: flex-end;
+                    }
+                    .playlist-audio.organized {
+                        width: 100%;
+                        min-width: 0;
+                        max-width: 100%;
+                        height: 56px;
+                        accent-color: #fff;
+                        background: transparent;
+                        border: none;
+                        margin: 0.2em 0 0.2em 0;
+                        display: block;
+                        box-sizing: border-box;
+                    }
+                    .video-btn.organized {
+                        font-size: 1em;
+                        padding: 0.1em 0.5em;
+                        background: #d32f2f;
+                        color: #fff;
+                        border-radius: 6px;
+                        border: none;
+                        box-shadow: 0 2px 8px rgba(211,47,47,0.10);
+                        transition: background 0.2s;
+                    }
+                    .video-btn.organized:hover {
+                        background: #b71c1c;
+                    }
+                .playlist-card.transparent-audio {
+                    background: none;
+                    box-shadow: none;
+                    border-radius: 0;
+                    padding: 1.2rem 0.5rem 1.1rem 0.5rem;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    margin-bottom: 0.7em;
+                }
+                .playlist-card-header.transparent-audio {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: baseline;
+                    gap: 1.2em;
+                    width: 100%;
+                    justify-content: center;
+                    margin-bottom: 0.5em;
+                }
+                .playlist-card-title {
+                    font-size: 1.12em;
+                    font-weight: 700;
+                    color: #2176c7;
+                    flex: 2 1 0;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                .playlist-card-genre {
+                    font-size: 1em;
+                    color: #569cd6;
+                    font-weight: 500;
+                    flex: 1 1 0;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                .playlist-card-media.transparent-audio {
+                    width: 100%;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .audio-wrapper.transparent-audio {
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: none;
+                    border-radius: 0;
+                    padding: 0;
+                    box-shadow: none;
+                }
+                .playlist-audio.transparent-audio {
+                    width: 420px;
+                    min-width: 260px;
+                    height: 48px;
+                    font-size: 1.2em;
+                    accent-color: #2176c7;
+                    background: transparent;
+                    border: none;
+                    margin: 0;
+                }
+            .playlist-cards {
+                display: flex;
+                flex-direction: column;
+                gap: 1.2rem;
+                width: 100%;
+                margin-top: 1.2rem;
+            }
+            .playlist-card {
+                background: #f7fbff;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(86,156,214,0.10);
+                padding: 1.2rem 1.5rem 1.1rem 1.5rem;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                transition: box-shadow 0.2s;
+            }
+            .playlist-card-header {
+                display: flex;
+                flex-direction: row;
+                align-items: baseline;
+                gap: 1.2em;
+                margin-bottom: 0.7em;
+                width: 100%;
+            }
+            .playlist-card-title {
+                font-size: 1.18em;
+                font-weight: 700;
+                color: #2176c7;
+                flex: 2 1 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .playlist-card-genre {
+                font-size: 1.05em;
+                color: #569cd6;
+                font-weight: 500;
+                flex: 1 1 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .playlist-card-media {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 1em;
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .audio-wrapper.colorful {
+                display: flex;
+                align-items: center;
+                background: linear-gradient(90deg, #7db8ff 0%, #f7b267 100%);
+                border-radius: 8px;
+                padding: 4px 12px 4px 8px;
+                box-shadow: 0 2px 8px rgba(86,156,214,0.10);
+            }
+            .audio-wrapper.colorful audio.playlist-audio.spacious {
+                background: none;
+                border: none;
+                width: 160px;
+                min-width: 120px;
+                height: 28px;
+                margin: 0;
+                accent-color: #2176c7;
+            }
+            .video-btn.spacious {
+                font-size: 1.08em;
+                padding: 0.2em 0.7em;
+                margin-left: 0.2em;
+                background: #d32f2f;
+                color: #fff;
+                border-radius: 6px;
+                border: none;
+                box-shadow: 0 2px 8px rgba(211,47,47,0.10);
+                transition: background 0.2s;
+            }
+            .video-btn.spacious:hover {
+                background: #b71c1c;
+            }
+        .playlist-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.7em;
+            width: 100%;
+            min-height: 32px;
+        }
+        .audio-wrapper.colorful {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(90deg, #7db8ff 0%, #f7b267 100%);
+            border-radius: 8px;
+            padding: 2px 8px 2px 4px;
+            box-shadow: 0 2px 8px rgba(86,156,214,0.10);
+        }
+        .audio-wrapper.colorful audio.playlist-audio.compact {
+            background: none;
+            border: none;
+            width: 120px;
+            min-width: 90px;
+            height: 22px;
+            margin: 0;
+            accent-color: #2176c7;
+        }
+    .audio-playlist {
+        margin-top: 0.7rem;
+    }
+    .playlist-list.compact {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+    }
+    .playlist-track.compact {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        background: rgba(86, 156, 214, 0.07);
+        border-bottom: 1px solid #569cd6;
+        padding: 0.25rem 0.2rem;
+        margin: 0;
+        min-height: 32px;
+        font-size: 0.93em;
+        gap: 0.7em;
+        transition: background 0.2s;
+    }
+    .playlist-track-title.compact {
+        font-size: 0.98em;
+        font-weight: 500;
+        color: #2176c7;
+        margin-right: 0.7em;
+        margin-bottom: 0;
+        white-space: nowrap;
+        max-width: 14em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .playlist-track-genre.compact {
+        color: #569cd6;
+        font-size: 0.92em;
+        margin-right: 0.7em;
+        margin-bottom: 0;
+        white-space: nowrap;
+        max-width: 8em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .playlist-audio.compact {
+        width: 120px;
+        min-width: 90px;
+        height: 22px;
+        margin: 0 0.3em 0 0;
+    }
+    .video-btn.compact {
+        font-size: 1em;
+        padding: 0.1em 0.4em;
+        margin-left: 0.2em;
+        background: none;
+        color: #d32f2f;
+        border: none;
+        box-shadow: none;
+    }
+    .playlist-track.compact:last-child {
+        border-bottom: none;
+    }
+    </style>
+</style>
+<script>
+// Ensure only one audio plays at a time
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('reel-tracks');
+    if (!container) return;
+    container.addEventListener('play', function(e) {
+        if (e.target.tagName === 'AUDIO') {
+            document.querySelectorAll('audio').forEach(audio => {
+                if (audio !== e.target) audio.pause();
+            });
+        }
+    }, true);
+});
+</body>
+</html>

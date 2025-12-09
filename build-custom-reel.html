@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Custom Reel - DANIEL KIM</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">DANIEL S. KIM</a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="works.html" class="nav-link">Works</a></li>
+                <li><a href="requests.html" class="nav-link">Requests</a></li>
+                <li><a href="media-music.html" class="nav-link">Media Music</a></li>
+                <li class="dropdown">
+                    <a href="#" class="nav-link">More ▾</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="events.html" class="dropdown-link">Events</a></li>
+                        <li><a href="converter.html" class="dropdown-link">Text to Music Converter</a></li>
+                        <li><a href="chord-progression.html" class="dropdown-link">Chord Progression Generator</a></li>
+                        <li><a href="sunset-bird.html" class="dropdown-link">Sunset Bird</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <main>
+        <section class="content">
+            <h1>Build Custom Reel</h1>
+            <p>Select tracks below to create your own custom reel. When ready, click "Generate Reel Link" to get a shareable playlist.</p>
+            <button type="button" id="generate-reel-btn-top" class="reel-btn" style="margin-bottom:1.5rem;">Generate Reel Link</button>
+            <form id="custom-reel-form" style="margin-top:0;">
+                <div class="custom-reel-list" id="track-list" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
+                <button type="button" id="generate-reel-btn" class="reel-btn" style="margin-top:2rem;">Generate Reel Link</button>
+            </form>
+            <div id="reel-link-container" style="margin-top:1.5rem;"></div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Daniel S. Kim. All rights reserved.</p>
+    </footer>
+    <script>
+    // Fetch and display all media music tracks with checkboxes
+    fetch('WebsiteWorks.csv', { cache: 'no-store' })
+        .then(response => response.text())
+        .then(csvText => {
+            function parseCSV(text) {
+                const rows = [];
+                let currentField = '', currentRow = [], insideQuotes = false;
+                for (let i = 0; i < text.length; i++) {
+                    const char = text[i], nextChar = text[i + 1];
+                    if (char === '"' && nextChar === '"' && insideQuotes) { currentField += '"'; i++; }
+                    else if (char === '"') { insideQuotes = !insideQuotes; }
+                    else if (char === ',' && !insideQuotes) { currentRow.push(currentField); currentField = ''; }
+                    else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                        if (char === '\r' && nextChar === '\n') i++;
+                        if (currentField || currentRow.length > 0) { currentRow.push(currentField); rows.push(currentRow); currentRow = []; currentField = ''; }
+                    } else { currentField += char; }
+                }
+                if (currentField || currentRow.length > 0) { currentRow.push(currentField); rows.push(currentRow); }
+                return rows;
+            }
+            const rows = parseCSV(csvText);
+            if (!rows || rows.length < 2) return;
+            const headerRow = rows[0];
+            const works = [];
+            for (let i = 1; i < rows.length; i++) {
+                const values = rows[i];
+                if (values[0] === 'PUBLISHED') {
+                    const work = {};
+                    for (let j = 0; j < headerRow.length; j++) {
+                        work[headerRow[j]?.trim() || `col${j}`] = values[j] || '';
+                    }
+                    works.push(work);
+                }
+            }
+            // Only media music works
+            const mediaWorks = works.filter(work => {
+                const tags = (work['InstrumentTags'] || '').replace(/\[|\]/g, '').split(',').map(t => t.trim().toLowerCase());
+                return tags.includes('media music');
+            });
+            // Render compact single-column cards for each track
+            const trackList = document.getElementById('track-list');
+            trackList.innerHTML = mediaWorks.map((work, idx) => {
+                const audioSrc = work['mediaName'] ? `media-music-audio/${work['mediaName'].trim()}` : '';
+                return `
+                <div class="custom-reel-track" data-idx="${idx}" style="display:flex;align-items:center;gap:1rem;padding:0.5rem 0;border-bottom:1px solid #eee;cursor:pointer;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;min-width:0;">
+                        <input type="checkbox" id="track-${idx}" name="track" value="${encodeURIComponent(work.Title)}" data-title="${encodeURIComponent(work.Title)}" style="width:1.5em;height:1.5em;">
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-weight:600;font-size:1.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${work.Title}</div>
+                            <div style="font-size:0.95em;color:#569cd6;">${work.genreTag || ''}</div>
+                        </div>
+                    </div>
+                    ${audioSrc ? `<audio controls style="height:32px;width:320px;"><source src="${audioSrc}" type="audio/mpeg"></audio>` : ''}
+                </div>
+                `;
+            }).join('');
+            // Add logic to pause all other audio players when one starts
+            const audioEls = trackList.querySelectorAll('audio');
+            audioEls.forEach(audio => {
+                audio.addEventListener('play', () => {
+                    audioEls.forEach(other => {
+                        if (other !== audio) other.pause();
+                    });
+                });
+            });
+            // Make clicking the card toggle the checkbox
+            const cardEls = trackList.querySelectorAll('.custom-reel-track');
+            cardEls.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // Don't toggle if clicking the checkbox or audio controls
+                    if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'audio' || e.target.closest('audio')) return;
+                    const idx = card.getAttribute('data-idx');
+                    const checkbox = document.getElementById(`track-${idx}`);
+                    if (checkbox) checkbox.checked = !checkbox.checked;
+                });
+            });
+        });
+    // Generate shareable link
+    function handleGenerateReelLink() {
+        const checked = Array.from(document.querySelectorAll('input[name="track"]:checked'));
+        if (checked.length === 0) {
+            document.getElementById('reel-link-container').innerHTML = '<span style="color:#c00;">Please select at least one track.</span>';
+            return;
+        }
+        const titles = checked.map(cb => cb.getAttribute('data-title'));
+        const url = `genre-reel.html?custom=${titles.join(',')}`;
+        window.location.href = url;
+    }
+    document.getElementById('generate-reel-btn').onclick = handleGenerateReelLink;
+    document.getElementById('generate-reel-btn-top').onclick = handleGenerateReelLink;
+    </script>
+</body>
+</html>

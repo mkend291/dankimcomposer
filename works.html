@@ -15,6 +15,7 @@
                 <li><a href="index.html" class="nav-link">Home</a></li>
                 <li><a href="works.html" class="nav-link active">Works</a></li>
                 <li><a href="requests.html" class="nav-link">Requests</a></li>
+                <li><a href="media-music.html" class="nav-link">Media Music</a></li>
                 <li class="dropdown">
                     <a href="#" class="nav-link">More ▾</a>
                     <ul class="dropdown-menu">
@@ -181,25 +182,20 @@
                     return rows;
                 }
                 const rows = parseCSV(csvText);
-                for (let i = 2; i < rows.length; i++) {
+                if (rows.length < 2) return;
+                const headerRow = rows[0];
+                for (let i = 1; i < rows.length; i++) {
                     const values = rows[i];
-                    if (values[0] === 'PUBLISHED' && values.length >= 8) {
-                        const work = {
-                            status: values[0] || '',
-                            title: values[1] || '',
-                            instrumentTags: values[2] || '',
-                            instruments: values[3] || '',
-                            description: values[4] || '',
-                            duration: values[5] || '',
-                            orderDate: values[6] || '',
-                            year: values[7] || (values[6] ? new Date(values[6]).getFullYear().toString() : ''),
-                            videoLink: values[8] || '',
-                            buyLink: values[9] || '',
-                            movements: values[10] || '',
-                            commission: values[11] || '',
-                            playlist: values[12] || '',
-                            isArrangement: values[13] || ''
-                        };
+                    if (values[0] === 'PUBLISHED') {
+                        // Map header to value, fallback to '' if missing
+                        const work = {};
+                        for (let j = 0; j < headerRow.length; j++) {
+                            work[headerRow[j]?.trim() || `col${j}`] = values[j] || '';
+                        }
+                        // Provide legacy fallback for year if missing
+                        if (!work['Year'] && work['OrderDate']) {
+                            work['Year'] = new Date(work['OrderDate']).getFullYear().toString();
+                        }
                         allWorks.push(work);
                     }
                 }
@@ -208,7 +204,7 @@
                 // Populate instrument filter
                 const instrumentTags = new Set();
                 allWorks.forEach(work => {
-                    const tags = work.instrumentTags.replace(/[\[\]]/g, '').split(',');
+                    const tags = (work['InstrumentTags'] || '').replace(/\[|\]/g, '').split(',');
                     tags.forEach(tag => {
                         const trimmedTag = tag.trim();
                         if (trimmedTag && trimmedTag.toLowerCase() !== 'media music') {
@@ -243,10 +239,10 @@
             const searchTerm = document.getElementById('works-search').value.trim().toLowerCase();
             let filteredWorks = allWorks.filter(work => {
                 // Parse instrument tags
-                const tags = work.instrumentTags.replace(/[\[\]]/g, '').split(',').map(t => t.trim());
+                const tags = (work['InstrumentTags'] || '').replace(/\[|\]/g, '').split(',').map(t => t.trim());
                 // Type filter
                 const isMediaMusic = tags.some(tag => tag.toLowerCase() === 'media music');
-                const arrangementValue = work.isArrangement ? work.isArrangement.replace(/[\[\]]/g, '').trim().toLowerCase() : '';
+                const arrangementValue = work['isArrangement'] ? work['isArrangement'].replace(/\[|\]/g, '').trim().toLowerCase() : '';
                 const isArrangement = arrangementValue === 'arrangement';
                 if (typeFilter === 'concert' && (isMediaMusic || isArrangement)) return false;
                 if (typeFilter === 'media' && (!isMediaMusic || isArrangement)) return false;
@@ -257,9 +253,9 @@
                 }
                 // Search filter
                 if (searchTerm) {
-                    const inTitle = work.title && work.title.toLowerCase().includes(searchTerm);
-                    const inDesc = work.description && work.description.toLowerCase().includes(searchTerm);
-                    const inInstr = work.instruments && work.instruments.toLowerCase().includes(searchTerm);
+                    const inTitle = work['Title'] && work['Title'].toLowerCase().includes(searchTerm);
+                    const inDesc = work['Description'] && work['Description'].toLowerCase().includes(searchTerm);
+                    const inInstr = work['Instruments'] && work['Instruments'].toLowerCase().includes(searchTerm);
                     if (!inTitle && !inDesc && !inInstr) return false;
                 }
                 return true;
@@ -276,22 +272,22 @@
                         <div class="work-item ${colorClass}">
                             <div class="work-main">
                                 <div class="work-info">
-                                    <h3>${work.title ? work.title.toUpperCase() : ''}</h3>
-                                    <div class="work-instrumentation" style="font-weight: normal; font-family: inherit;">${work.instruments || ''}</div>
+                                    <h3>${work['Title'] ? work['Title'].toUpperCase() : ''}</h3>
+                                    <div class="work-instrumentation" style="font-weight: normal; font-family: inherit;">${work['Instruments'] || ''}</div>
                                     <div class="work-meta" style="font-weight: normal; font-family: inherit; color: #cccccc;">
-                                        ${work.year ? `<span class='work-year-text' style='font-weight: normal;'>${work.year}</span>` : ''}
-                                        ${(work.year && work.duration) ? ' • ' : ''}
-                                        ${work.duration && work.duration.trim() ? `${work.duration} min` : ''}
+                                        ${work['Year'] ? `<span class='work-year-text' style='font-weight: normal;'>${work['Year']}</span>` : ''}
+                                        ${(work['Year'] && work['Duration']) ? ' • ' : ''}
+                                        ${work['Duration'] && work['Duration'].trim() ? `${work['Duration']} min` : ''}
                                     </div>
                                 </div>
                                 <div class="work-actions">
-                                    ${work.description && work.description.trim() ? `<button class="action-btn description-btn" onclick="toggleDescription(this.closest('.work-item'))"><i class='fa-solid fa-circle-info'></i> Info</button>` : ''}
-                                    ${(work.videoLink && work.videoLink.trim()) || (work.playlist && work.playlist.trim()) ? `<a href="${work.videoLink && work.videoLink.trim() ? work.videoLink : work.playlist}" target="_blank" class="action-btn video-btn"><i class='fab fa-youtube'></i> Video</a>` : ''}
-                                    ${work.buyLink && work.buyLink.trim() ? `<a href="${work.buyLink}" target="_blank" class="action-btn score-btn"><i class='fa-solid fa-dollar-sign'></i> Purchase</a>` : ''}
-                                    ${!work.buyLink || !work.buyLink.trim() ? `<button class="action-btn request-btn" onclick="openWorkRequestForm('${work.title.replace(/'/g, "\\'")}')"><i class='fa-solid fa-envelope'></i> Request</button>` : ''}
+                                    ${work['Description'] && work['Description'].trim() ? `<button class="action-btn description-btn" onclick="toggleDescription(this.closest('.work-item'))"><i class='fa-solid fa-circle-info'></i> Info</button>` : ''}
+                                    ${(work['Video Link'] && work['Video Link'].trim()) || (work['Playlist'] && work['Playlist'].trim()) ? `<a href="${work['Video Link'] && work['Video Link'].trim() ? work['Video Link'] : work['Playlist']}" target="_blank" class="action-btn video-btn"><i class='fab fa-youtube'></i> Video</a>` : ''}
+                                    ${work['Buy Link'] && work['Buy Link'].trim() ? `<a href="${work['Buy Link']}" target="_blank" class="action-btn score-btn"><i class='fa-solid fa-dollar-sign'></i> Purchase</a>` : ''}
+                                    ${!work['Buy Link'] || !work['Buy Link'].trim() ? `<button class="action-btn request-btn" onclick="openWorkRequestForm('${(work['Title'] || '').replace(/'/g, "\\'")}')"><i class='fa-solid fa-envelope'></i> Request</button>` : ''}
                                 </div>
                             </div>
-                            ${work.description && work.description.trim() ? `<div class="work-description" style="display: none;">${work.description}</div>` : ''}
+                            ${work['Description'] && work['Description'].trim() ? `<div class="work-description" style="display: none;">${work['Description']}</div>` : ''}
                         </div>
                     `}).join('')}
                 </div>

@@ -1,3 +1,78 @@
+/* Right-align audio player in custom reel builder */
+.custom-reel-track audio {
+    margin-left: auto;
+    display: block;
+}
+@media (max-width: 600px) {
+    .custom-reel-track audio {
+        margin-left: auto;
+        margin-right: 0;
+        width: 100% !important;
+    }
+}
+/* Consistent button style for custom reel builder */
+.reel-btn {
+    background: linear-gradient(90deg, #569cd6 0%, #7db8ff 100%);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.08em;
+    font-weight: 600;
+    padding: 0.7em 2.2em;
+    box-shadow: 0 2px 8px rgba(34,34,34,0.10);
+    cursor: pointer;
+    transition: background 0.18s, box-shadow 0.18s, transform 0.12s;
+}
+.reel-btn:hover, .reel-btn:focus {
+    background: linear-gradient(90deg, #4a8ac2 0%, #569cd6 100%);
+    box-shadow: 0 4px 16px rgba(34,34,34,0.13);
+    transform: translateY(-2px) scale(1.03);
+}
+/* Responsive: Custom Reel Builder audio player stacks below on small screens */
+@media (max-width: 600px) {
+    .custom-reel-track {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .custom-reel-track > div:first-child {
+        flex-direction: row !important;
+        align-items: center !important;
+        margin-bottom: 0 !important;
+        gap: 0.75rem !important;
+        min-width: 0 !important;
+    }
+    .custom-reel-track audio {
+        width: 100% !important;
+        min-width: 0 !important;
+        margin-top: 0.5rem;
+    }
+}
+.media-reels-grid .media-reel-card {
+    min-width: 160px;
+    max-width: 200px;
+    min-height: 90px;
+    padding: 1rem 0.75rem;
+    margin: 0.5rem;
+    font-size: 0.97em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+.requests-list.media-reels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem 1.2rem;
+    justify-items: center;
+    align-items: stretch;
+    margin-top: 1.2rem;
+}
+/* Media Music genreTag squares (blue, small, like request page) */
+/* Prevent 'Media Music' from wrapping in the menu bar */
+a.nav-link[href="media-music.html"] {
+    white-space: nowrap;
+}
 /* Ensure purchase button text is white */
 .score-btn {
     color: #fff !important;
@@ -382,6 +457,9 @@ main {
     display: inline-block;
     background-color: #569cd6;
     color: #fff;
+    border-radius: 4px;
+    text-align: center;
+    text-transform: uppercase;
 }
 
 .profile-btn:hover {
@@ -1195,19 +1273,19 @@ main {
 }
 
 .request-concert {
-    border-left: 4px solid #d4a959;
+    border-left: 4px solid #569cd6;
 }
 
 .request-concert h3 {
-    color: #d4a959;
+    color: #569cd6;
 }
 
 .request-media {
-    border-left: 4px solid #ce9178;
+    border-left: 4px solid #ffd700;
 }
 
 .request-media h3 {
-    color: #ce9178;
+    color: #ffd700;
 }
 
 .request-arrangement {
@@ -1244,7 +1322,7 @@ main {
 }
 
 .request-item button {
-    background-color: #6a9955;
+    background-color: #569cd6;
     color: #252836;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -1256,7 +1334,7 @@ main {
 }
 
 .request-item button:hover {
-    background-color: #7ba95a;
+    background-color: #2176c7;
 }
 
 /* Request Info Section */
@@ -1275,27 +1353,27 @@ main {
 }
 
 .info-useful {
-    border-left: 4px solid #d4a959;
+    border-left: 4px solid #569cd6;
 }
 
 .info-useful h3 {
-    color: #d4a959;
+    color: #569cd6;
 }
 
 .info-useful li:before {
-    color: #d4a959;
+    color: #569cd6;
 }
 
 .info-expect {
-    border-left: 4px solid #ce9178;
+    border-left: 4px solid #569cd6;
 }
 
 .info-expect h3 {
-    color: #ce9178;
+    color: #569cd6;
 }
 
 .info-expect li:before {
-    color: #ce9178;
+    color: #569cd6;
 }
 
 .info-box h3 {
@@ -1512,7 +1590,9 @@ main {
 }
 .timeline-marker.event-color-0 { color: #6a9955; }
 .timeline-marker.event-color-1 { color: #d4a959; }
+ .timeline-marker.event-color-1 { color: #569cd6; }
 .timeline-marker.event-color-2 { color: #ce9178; }
+ .timeline-marker.event-color-2 { color: #569cd6; }
 .timeline-marker.event-color-3 { color: #c586c0; }
 .timeline-marker.event-color-4 { color: #4ec9b0; }
 .timeline-marker.event-color-5 { color: #569cd6; }
@@ -1554,30 +1634,30 @@ main {
 }
 
 .timeline-content.event-color-0 {
-    border-left: 4px solid #6a9955;
+    border-left: 4px solid #569cd6;
 }
 
 .timeline-content.event-color-0 h3,
 .timeline-content.event-color-0 .event-date {
-    color: #6a9955;
+    color: #569cd6;
 }
 
 .timeline-content.event-color-1 {
-    border-left: 4px solid #d4a959;
+    border-left: 4px solid #569cd6;
 }
 
 .timeline-content.event-color-1 h3,
 .timeline-content.event-color-1 .event-date {
-    color: #d4a959;
+    color: #569cd6;
 }
 
 .timeline-content.event-color-2 {
-    border-left: 4px solid #ce9178;
+    border-left: 4px solid #569cd6;
 }
 
 .timeline-content.event-color-2 h3,
 .timeline-content.event-color-2 .event-date {
-    color: #ce9178;
+    color: #569cd6;
 }
 
 .timeline-content.event-color-3 {
@@ -1966,7 +2046,11 @@ footer {
     flex-direction: column;
     gap: 0.5rem;
 }
-
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    justify-items: center;
+    align-items: stretch;
+}
 .chord-group label {
     font-weight: 500;
     color: #d4d4d4;
