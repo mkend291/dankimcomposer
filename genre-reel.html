@@ -188,6 +188,22 @@
                         cursorColor: '#fff',
                         interact: true
                     });
+                    // Mobile touch support for seeking
+                    const waveformDiv = document.getElementById(`waveform-${idx}`);
+                    waveformDiv.addEventListener('touchstart', function(e) {
+                        if (e.touches.length === 1) {
+                            const rect = waveformDiv.getBoundingClientRect();
+                            const x = e.touches[0].clientX - rect.left;
+                            const percent = x / rect.width;
+                            ws.seekTo(percent);
+                            setTimeout(() => {
+                                if (!ws.isPlaying()) {
+                                    wavesurfers.forEach((other, j) => { if (j !== idx && other) other.pause(); });
+                                    ws.play();
+                                }
+                            }, 50);
+                        }
+                    });
                     ws.load(audioSrc);
                     wavesurfers[idx] = ws;
                     // Play/Pause button
