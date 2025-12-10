@@ -1864,6 +1864,18 @@ footer {
     padding: 2rem;
     margin-top: 3rem;
     border-top: 1px solid #1a1f3a;
+        position: static;
+        width: 100%;
+        z-index: 10;
+}
+
+@media (max-width: 800px) {
+    footer {
+        position: static !important;
+        width: 100% !important;
+        margin-top: 2rem;
+    }
+}
 }
 
 /* Responsive Design */

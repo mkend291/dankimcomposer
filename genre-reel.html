@@ -176,7 +176,7 @@
             const wavesurfers = [];
             filtered.forEach((work, idx) => {
                 if (work['mediaName'] && work['mediaName'].trim()) {
-                    const audioSrc = `media-music-audio/${work['mediaName'].trim()}`;
+                    const audioSrc = `media-music-audio/${work['mediaName'].trim()}?v=${Date.now()}`;
                     const ws = WaveSurfer.create({
                         container: `#waveform-${idx}`,
                         waveColor: '#7db8ff',
