@@ -200,7 +200,7 @@
                     }
                 }
                 // Sort all works by date (most recent first)
-                allWorks.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+                allWorks.sort((a, b) => new Date(b.OrderDate) - new Date(a.OrderDate));
                 // Populate instrument filter
                 const instrumentTags = new Set();
                 allWorks.forEach(work => {
@@ -221,7 +221,7 @@
                 });
                 // Calculate and display stats
                 const totalWorks = allWorks.length;
-                const totalMinutes = allWorks.reduce((sum, work) => sum + (parseFloat(work.duration) || 0), 0);
+                const totalMinutes = allWorks.reduce((sum, work) => sum + (parseFloat(work['Duration']) || 0), 0);
                 const totalHours = (totalMinutes / 60).toFixed(1);
                 document.getElementById('works-stats').textContent = `${totalWorks} works • ${totalHours} hours of music`;
                 // Display all works
