@@ -40,8 +40,11 @@
         </section>
     </main>
     <footer>
-        <p>&copy; 2025 Daniel S. Kim. All rights reserved.</p>
+                <p>&copy; <span id="copyright-year"></span> Daniel S. Kim. All rights reserved.</p>
     </footer>
+        <script>
+            document.getElementById('copyright-year').textContent = new Date().getFullYear();
+        </script>
     <script>
         // Fetch and parse works
         fetch('WebsiteWorks.csv', { cache: 'no-store' })
