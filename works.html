@@ -272,6 +272,13 @@
                 <div class="works-list">
                     ${filteredWorks.map((work, index) => {
                         const colorClass = `work-color-${index % 2}`;
+                        // Handle Parakeet Press link encoding
+                        let buyLink = work['Buy Link'] && work['Buy Link'].trim();
+                        if (buyLink && buyLink.startsWith('https://parakeetpress.com/product-details.html?title=')) {
+                            const base = 'https://parakeetpress.com/product-details.html?title=';
+                            const encodedTitle = encodeURIComponent(work['Title'] || '');
+                            buyLink = base + encodedTitle;
+                        }
                         return `
                         <div class="work-item ${colorClass}">
                             <div class="work-main">
@@ -287,8 +294,8 @@
                                 <div class="work-actions">
                                     ${work['Description'] && work['Description'].trim() ? `<button class="action-btn description-btn" onclick="toggleDescription(this.closest('.work-item'))"><i class='fa-solid fa-circle-info'></i> Info</button>` : ''}
                                     ${(work['Video Link'] && work['Video Link'].trim()) || (work['Playlist'] && work['Playlist'].trim()) ? `<a href="${work['Video Link'] && work['Video Link'].trim() ? work['Video Link'] : work['Playlist']}" target="_blank" class="action-btn video-btn"><i class='fab fa-youtube'></i> Video</a>` : ''}
-                                    ${work['Buy Link'] && work['Buy Link'].trim() ? `<a href="${work['Buy Link']}" target="_blank" class="action-btn score-btn"><i class='fa-solid fa-dollar-sign'></i> Purchase</a>` : ''}
-                                    ${!work['Buy Link'] || !work['Buy Link'].trim() ? `<button class="action-btn request-btn" onclick="openWorkRequestForm('${(work['Title'] || '').replace(/'/g, "\\'")}')"><i class='fa-solid fa-envelope'></i> Request</button>` : ''}
+                                    ${buyLink ? `<a href="${buyLink}" target="_blank" class="action-btn score-btn"><i class='fa-solid fa-dollar-sign'></i> Purchase</a>` : ''}
+                                    ${!buyLink ? `<button class="action-btn request-btn" onclick="openWorkRequestForm('${(work['Title'] || '').replace(/'/g, "\\'")}')"><i class='fa-solid fa-envelope'></i> Request</button>` : ''}
                                 </div>
                             </div>
                             ${work['Description'] && work['Description'].trim() ? `<div class="work-description" style="display: none;">${work['Description']}</div>` : ''}
