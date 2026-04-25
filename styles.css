@@ -1,3 +1,48 @@
+@media (max-width: 700px) {
+    .work-main {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0 !important;
+        padding-bottom: 0.5rem !important;
+    }
+    .work-info {
+        text-align: left !important;
+        align-items: flex-start !important;
+    }
+    .work-info > *:last-child {
+        margin-bottom: 0 !important;
+    }
+    .work-actions {
+        justify-content: center !important;
+        align-items: center !important;
+        margin-top: 0 !important;
+    }
+    .work-actions > *:first-child {
+        margin-top: 0 !important;
+    }
+}
+@media (max-width: 700px) {
+    .work-main {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0 !important;
+    }
+    .work-info {
+        text-align: left;
+        align-items: flex-start;
+    }
+    .work-info > *:last-child {
+        margin-bottom: 0 !important;
+    }
+    .work-actions {
+        justify-content: center !important;
+        align-items: center !important;
+        margin-top: 0 !important;
+    }
+    .work-actions > *:first-child {
+        margin-top: 0 !important;
+    }
+}
 /* Right-align audio player in custom reel builder */
 .custom-reel-track audio {
     margin-left: auto;
@@ -852,8 +897,8 @@ main {
 .work-main {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    padding: 1.25rem 1.5rem 0.5rem 1.5rem;
+    align-items: flex-end;
+    padding: 0.2rem 1.5rem 0.5rem 1.5rem;
     gap: 1.5rem;
 }
 
@@ -889,7 +934,14 @@ main {
 }
 
 .action-btn {
-    padding: 0.4rem 0.8rem;
+    padding: 0.6em 1.1em;
+    height: 2.4em;
+    min-height: 2.4em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.1;
+    box-sizing: border-box;
     background-color: #569cd6;
     color: #060620;
     text-decoration: none;

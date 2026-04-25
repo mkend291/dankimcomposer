@@ -15,10 +15,10 @@
                 <li><a href="index.html" class="nav-link">Home</a></li>
                 <li><a href="works.html" class="nav-link active">Works</a></li>
                 <li><a href="requests.html" class="nav-link">Requests</a></li>
-                <li><a href="media-music.html" class="nav-link">Media Music</a></li>
                 <li class="dropdown">
                     <a href="#" class="nav-link">More ▾</a>
                     <ul class="dropdown-menu">
+                        <li><a href="media-music.html" class="dropdown-link">Media Music</a></li>
                         <li><a href="events.html" class="dropdown-link">Events</a></li>
                         <li><a href="converter.html" class="dropdown-link">Text to Music Converter</a></li>
                         <li><a href="chord-progression.html" class="dropdown-link">Chord Progression Generator</a></li>
@@ -60,6 +60,18 @@
             <!-- Works Container -->
             <div id="works-container">
                 <p>Loading works...</p>
+            </div>
+            <div id="works-pagination-container" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; margin-top: 1.5rem;">
+                <div id="works-pagination" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem;"></div>
+                <div id="works-per-page-container" style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem; background: #569cd6; padding: 0.5rem 1rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <label for="works-per-page" style="font-size: 1rem; color: #fff;">Show</label>
+                    <select id="works-per-page" style="font-size: 1rem; padding: 0.25rem 0.75rem; border-radius: 4px; border: 1px solid #fff; background: #7db8ff; color: #222; font-weight: 600;">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                    <span style="font-size: 1rem; color: #fff;">per page</span>
+                </div>
             </div>
 
             <!-- Request Form Overlay -->
@@ -164,6 +176,8 @@
         }
         
         let allWorks = [];
+        let currentPage = 1;
+        let worksPerPage = 10;
         
         // Load works from CSV
         fetch('WebsiteWorks.csv', { cache: 'no-store' })
@@ -238,6 +252,7 @@
         
         function displayWorks() {
             const container = document.getElementById('works-container');
+            const pagination = document.getElementById('works-pagination');
             const typeFilter = document.getElementById('type-filter').value;
             const instrumentFilter = document.getElementById('instrument-filter').value;
             const searchTerm = document.getElementById('works-search').value.trim().toLowerCase();
@@ -264,15 +279,23 @@
                 }
                 return true;
             });
+            // Pagination logic
+            const totalWorks = filteredWorks.length;
+            const totalPages = Math.ceil(totalWorks / worksPerPage) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+            const startIdx = (currentPage - 1) * worksPerPage;
+            const endIdx = startIdx + worksPerPage;
+            const paginatedWorks = filteredWorks.slice(startIdx, endIdx);
             if (filteredWorks.length === 0) {
                 container.innerHTML = '<p>No works match the selected filters.</p>';
+                pagination.innerHTML = '';
                 return;
             }
             container.innerHTML = `
                 <div class="works-list">
-                    ${filteredWorks.map((work, index) => {
-                        const colorClass = `work-color-${index % 2}`;
-                        // Handle Parakeet Press link encoding
+                    ${paginatedWorks.map((work, index) => {
+                        const colorClass = `work-color-${(startIdx + index) % 2}`;
                         let buyLink = work['Buy Link'] && work['Buy Link'].trim();
                         if (buyLink && buyLink.startsWith('https://parakeetpress.com/product-details.html?title=')) {
                             const base = 'https://parakeetpress.com/product-details.html?title=';
@@ -281,21 +304,28 @@
                         }
                         return `
                         <div class="work-item ${colorClass}">
-                            <div class="work-main">
-                                <div class="work-info">
-                                    <h3>${work['Title'] ? work['Title'].toUpperCase() : ''}</h3>
+                            <div class="work-title-row" style="width:100%;position:relative;padding:0.5rem 1.5rem 0 1.5rem;box-sizing:border-box;">
+                                <h3 style="margin-bottom: 0.2em; width:100%;">${work['Title'] ? work['Title'].toUpperCase() : ''}</h3>
+                            </div>
+                            <div class="work-main" style="display: flex; gap: 1.5rem; position:relative;">
+                                <div class="work-info" style="flex: 1 1 auto; position:relative;">
                                     <div class="work-instrumentation" style="font-weight: normal; font-family: inherit;">${work['Instruments'] || ''}</div>
                                     <div class="work-meta" style="font-weight: normal; font-family: inherit; color: #cccccc;">
                                         ${work['Year'] ? `<span class='work-year-text' style='font-weight: normal;'>${work['Year']}</span>` : ''}
-                                        ${(work['Year'] && work['Duration']) ? ' • ' : ''}
-                                        ${work['Duration'] && work['Duration'].trim() ? `${work['Duration']} min` : ''}
+                                        ${(work['Year'] && work['Duration']) ? ' | ' : ''}
+                                        ${work['Duration'] && work['Duration'].trim() ? `ca. ${work['Duration']} min.` : ''}
+                                        ${work['OrderDate'] ? `<div class='work-added-date' style='display:none;color:#aaa;font-size:0.97em;margin-top:0.1em;'>Added: ${(() => {
+                                            const d = new Date(work['OrderDate']);
+                                            if (isNaN(d)) return work['OrderDate'];
+                                            return d.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                                        })()}</div>` : ''}
                                     </div>
                                 </div>
-                                <div class="work-actions">
-                                    ${work['Description'] && work['Description'].trim() ? `<button class="action-btn description-btn" onclick="toggleDescription(this.closest('.work-item'))"><i class='fa-solid fa-circle-info'></i> Info</button>` : ''}
-                                    ${(work['Video Link'] && work['Video Link'].trim()) || (work['Playlist'] && work['Playlist'].trim()) ? `<a href="${work['Video Link'] && work['Video Link'].trim() ? work['Video Link'] : work['Playlist']}" target="_blank" class="action-btn video-btn"><i class='fab fa-youtube'></i> Video</a>` : ''}
-                                    ${buyLink ? `<a href="${buyLink}" target="_blank" class="action-btn score-btn"><i class='fa-solid fa-dollar-sign'></i> Purchase</a>` : ''}
-                                    ${!buyLink ? `<button class="action-btn request-btn" onclick="openWorkRequestForm('${(work['Title'] || '').replace(/'/g, "\\'")}')"><i class='fa-solid fa-envelope'></i> Request</button>` : ''}
+                                <div class="work-actions" style="display: flex; flex-direction: row; gap: 0.5rem; position:relative;">
+                                    ${work['Description'] && work['Description'].trim() ? `<button class="action-btn description-btn" onclick="toggleDescription(this.closest('.work-item'))" style="background:#b3c6e0;color:#111;"><i class='fa-solid fa-circle-info' style='color:#111;'></i> <span style='color:#111;'>Info</span></button>` : ''}
+                                    ${(work['Video Link'] && work['Video Link'].trim()) || (work['Playlist'] && work['Playlist'].trim()) ? `<a href="${work['Video Link'] && work['Video Link'].trim() ? work['Video Link'] : work['Playlist']}" target="_blank" class="action-btn video-btn" style="background:#e57373;color:#222;"> <i class='fab fa-youtube'></i> Video</a>` : ''}
+                                    ${buyLink ? `<a href="${buyLink}" target="_blank" class="action-btn score-btn" style="background:#7ed957;color:#111;"><i class='fa-solid fa-dollar-sign' style='color:#111;'></i> <span style='color:#111;'>Purchase</span></a>` : ''}
+                                    ${!buyLink ? `<button class="action-btn request-btn" onclick="openWorkRequestForm('${(work['Title'] || '').replace(/'/g, "\\'")}')" style="background:#ffe066;color:#111;"><i class='fa-solid fa-envelope' style='color:#111;'></i> <span style='color:#111;'>Request</span></button>` : ''}
                                 </div>
                             </div>
                             ${work['Description'] && work['Description'].trim() ? `<div class="work-description" style="display: none;">${work['Description']}</div>` : ''}
@@ -303,9 +333,47 @@
                     `}).join('')}
                 </div>
             `;
+            // Pagination controls
+            let pagHtml = '';
+            if (totalPages > 1) {
+                pagHtml += `<button onclick=\"changeWorksPage(currentPage-1)\" ${currentPage === 1 ? 'disabled' : ''} style=\"background:#569cd6;color:#fff;border:none;padding:0.5rem 1rem;margin:0 0.25rem;border-radius:5px;cursor:pointer;opacity:${currentPage===1?'0.5':'1'};transition:background 0.18s;\">&laquo; Prev</button>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === currentPage) {
+                        pagHtml += `<button class=\"active\" disabled style=\"background:#7db8ff;color:#222;border:none;padding:0.5rem 1rem;margin:0 0.15rem;border-radius:5px;font-weight:600;\">${i}</button>`;
+                    } else if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
+                        pagHtml += `<button onclick=\"changeWorksPage(${i})\" style=\"background:#569cd6;color:#fff;border:none;padding:0.5rem 1rem;margin:0 0.15rem;border-radius:5px;cursor:pointer;transition:background 0.18s;\">${i}</button>`;
+                    } else if (i === currentPage - 3 || i === currentPage + 3) {
+                        pagHtml += '<span style=\"color:#aaa;padding:0 0.25rem;\">...</span>';
+                    }
+                }
+                pagHtml += `<button onclick=\"changeWorksPage(currentPage+1)\" ${currentPage === totalPages ? 'disabled' : ''} style=\"background:#569cd6;color:#fff;border:none;padding:0.5rem 1rem;margin:0 0.25rem;border-radius:5px;cursor:pointer;opacity:${currentPage===totalPages?'0.5':'1'};transition:background 0.18s;\">Next &raquo;</button>`;
+            }
+            pagination.innerHTML = pagHtml;
         }
+
+        // Change page function for pagination
+        function changeWorksPage(page) {
+            currentPage = page;
+            displayWorks();
+        }
+
+        // Change works per page
+        document.getElementById('works-per-page').addEventListener('change', function() {
+            worksPerPage = parseInt(this.value, 10);
+            currentPage = 1;
+            displayWorks();
+        });
         // Update works on filter/search
-        document.getElementById('type-filter').addEventListener('change', displayWorks);
-        document.getElementById('instrument-filter').addEventListener('change', displayWorks);
-        document.getElementById('works-search').addEventListener('input', displayWorks);
+        document.getElementById('type-filter').addEventListener('change', function() {
+            currentPage = 1;
+            displayWorks();
+        });
+        document.getElementById('instrument-filter').addEventListener('change', function() {
+            currentPage = 1;
+            displayWorks();
+        });
+        document.getElementById('works-search').addEventListener('input', function() {
+            currentPage = 1;
+            displayWorks();
+        });
     </script>
