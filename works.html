@@ -297,10 +297,15 @@
                     ${paginatedWorks.map((work, index) => {
                         const colorClass = `work-color-${(startIdx + index) % 2}`;
                         let buyLink = work['Buy Link'] && work['Buy Link'].trim();
-                        if (buyLink && buyLink.startsWith('https://parakeetpress.com/product-details.html?title=')) {
-                            const base = 'https://parakeetpress.com/product-details.html?title=';
-                            const encodedTitle = encodeURIComponent(work['Title'] || '');
-                            buyLink = base + encodedTitle;
+                        if (buyLink && buyLink.startsWith('https://parakeetpress.com/product-details.html')) {
+                            // Use the CSV ID column when constructing Parakeet product URLs
+                            // Preserve param name if present; default to `id` and use the CSV `ID` value.
+                            let param = 'id';
+                            if (buyLink.includes('?title=')) param = 'title';
+                            else if (buyLink.includes('?id=')) param = 'id';
+                            const base = 'https://parakeetpress.com/product-details.html?' + param + '=';
+                            const encodedId = encodeURIComponent(work['ID'] || work['Id'] || work['id'] || '');
+                            buyLink = base + encodedId;
                         }
                         return `
                         <div class="work-item ${colorClass}">
