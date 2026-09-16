@@ -18,10 +18,10 @@
                 <li class="dropdown">
                     <a href="#" class="nav-link">More ▾</a>
                     <ul class="dropdown-menu">
-                        <li><a href="media-music.html" class="dropdown-link">Media Music</a></li>
+                        <!-- <li><a href="media-music.html" class="dropdown-link">Media Music</a></li> -->
                         <li><a href="events.html" class="dropdown-link">Events</a></li>
                         <li><a href="converter.html" class="dropdown-link">Text to Music Converter</a></li>
-                        <li><a href="chord-progression.html" class="dropdown-link">Chord Progression Generator</a></li>
+                        <!-- <li><a href="chord-progression.html" class="dropdown-link">Chord Progression Generator</a></li> -->
                         <li><a href="sunset-bird.html" class="dropdown-link">Sunset Bird</a></li>
                     </ul>
                 </li>
@@ -41,12 +41,19 @@
             <!-- Filters -->
             <div class="filters">
                 <div class="filter-group">
+                    <label for="arrangement-filter">Category:</label>
+                    <select id="arrangement-filter" onchange="applyFilters()">
+                        <option value="all" selected>All</option>
+                        <option value="original">Original Works</option>
+                        <option value="arrangement">Arrangements</option>
+                    </select>
+                </div>
+                <div class="filter-group">
                     <label for="type-filter">Type:</label>
                     <select id="type-filter" onchange="applyFilters()">
                         <option value="all">All</option>
                         <option value="concert">Concert Music</option>
                         <option value="media">Media Music</option>
-                        <option value="arrangement">Arrangement</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -253,19 +260,29 @@
         function displayWorks() {
             const container = document.getElementById('works-container');
             const pagination = document.getElementById('works-pagination');
-            const typeFilter = document.getElementById('type-filter').value;
+            const arrangementFilter = (document.getElementById('arrangement-filter') ? document.getElementById('arrangement-filter').value : 'all').toLowerCase();
+            const typeFilter = (document.getElementById('type-filter') ? document.getElementById('type-filter').value : 'all').toLowerCase();
             const instrumentFilter = document.getElementById('instrument-filter').value;
             const searchTerm = document.getElementById('works-search').value.trim().toLowerCase();
             let filteredWorks = allWorks.filter(work => {
+                // Parse isArrangement column
+                const rawArrangement = work['isArrangement'] ? work['isArrangement'].replace(/\[|\]/g, '').trim().toLowerCase() : '';
+                const isArrangement = rawArrangement === 'arrangement';
+                const isOriginal = rawArrangement === 'original';
+
+                // Category filter: all (default), arrangements, or original works (using isArrangement column)
+                if (arrangementFilter === 'original' && !isOriginal) return false;
+                if (arrangementFilter === 'arrangement' && !isArrangement) return false;
+
                 // Parse instrument tags
                 const tags = (work['InstrumentTags'] || '').replace(/\[|\]/g, '').split(',').map(t => t.trim());
-                // Type filter
                 const isMediaMusic = tags.some(tag => tag.toLowerCase() === 'media music');
-                const arrangementValue = work['isArrangement'] ? work['isArrangement'].replace(/\[|\]/g, '').trim().toLowerCase() : '';
-                const isArrangement = arrangementValue === 'arrangement';
-                if (typeFilter === 'concert' && (isMediaMusic || isArrangement)) return false;
-                if (typeFilter === 'media' && (!isMediaMusic || isArrangement)) return false;
+
+                // Type filter
+                if (typeFilter === 'concert' && isMediaMusic) return false;
+                if (typeFilter === 'media' && !isMediaMusic) return false;
                 if (typeFilter === 'arrangement' && !isArrangement) return false;
+
                 // Instrument filter
                 if (instrumentFilter !== 'all') {
                     if (!tags.includes(instrumentFilter)) return false;
@@ -356,6 +373,11 @@
             pagination.innerHTML = pagHtml;
         }
 
+        function applyFilters() {
+            currentPage = 1;
+            displayWorks();
+        }
+
         // Change page function for pagination
         function changeWorksPage(page) {
             currentPage = page;
@@ -365,20 +387,17 @@
         // Change works per page
         document.getElementById('works-per-page').addEventListener('change', function() {
             worksPerPage = parseInt(this.value, 10);
-            currentPage = 1;
-            displayWorks();
+            applyFilters();
         });
         // Update works on filter/search
-        document.getElementById('type-filter').addEventListener('change', function() {
-            currentPage = 1;
-            displayWorks();
-        });
-        document.getElementById('instrument-filter').addEventListener('change', function() {
-            currentPage = 1;
-            displayWorks();
-        });
-        document.getElementById('works-search').addEventListener('input', function() {
-            currentPage = 1;
-            displayWorks();
-        });
+        const arrangementFilterEl = document.getElementById('arrangement-filter');
+        if (arrangementFilterEl) {
+            arrangementFilterEl.addEventListener('change', applyFilters);
+        }
+        document.getElementById('type-filter').addEventListener('change', applyFilters);
+        document.getElementById('instrument-filter').addEventListener('change', applyFilters);
+        document.getElementById('works-search').addEventListener('input', applyFilters);
     </script>
+    <script src="navbar.js"></script>
+</body>
+</html>

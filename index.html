@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DANIEL KIM - Composer • Arranger • Pianist</title>
-        <link rel="stylesheet" href="styles.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <nav class="navbar">
@@ -18,10 +18,10 @@
                 <li class="dropdown">
                     <a href="#" class="nav-link">More ▾</a>
                     <ul class="dropdown-menu">
-                        <li><a href="media-music.html" class="dropdown-link">Media Music</a></li>
+                        <!-- <li><a href="media-music.html" class="dropdown-link">Media Music</a></li> -->
                         <li><a href="events.html" class="dropdown-link">Events</a></li>
                         <li><a href="converter.html" class="dropdown-link">Text to Music Converter</a></li>
-                        <li><a href="chord-progression.html" class="dropdown-link">Chord Progression Generator</a></li>
+                        <!-- <li><a href="chord-progression.html" class="dropdown-link">Chord Progression Generator</a></li> -->
                         <li><a href="sunset-bird.html" class="dropdown-link">Sunset Bird</a></li>
                     </ul>
                 </li>
@@ -55,7 +55,7 @@
             <div class="video-scroll-container">
                 <button class="scroll-btn scroll-left" onclick="scrollVideos('left')">&#8249;</button>
                 <div class="video-carousel" id="videoCarousel">
-                    <p style="color: #7db8ff; text-align: center;">Loading videos...</p>
+                    <p style="color: var(--text-secondary); text-align: center;">Loading videos...</p>
                 </div>
                 <button class="scroll-btn scroll-right" onclick="scrollVideos('right')">&#8250;</button>
             </div>
@@ -91,17 +91,17 @@
                 <p><strong>Email:</strong> <a href="mailto:dankimcomposer@gmail.com">dankimcomposer@gmail.com</a></p>
             </div>
             <div class="social-links">
-                <a href="https://www.youtube.com/@dankim291" target="_blank" style="display:inline-flex;align-items:center;font-weight:600;background:#ff0000;color:#fff;padding:0.5em 1.2em;border-radius:6px;margin-right:0.5em;text-decoration:none;gap:0.5em;transition:background 0.18s;">
-                    <i class="fab fa-youtube" style="font-size:1.2em;color:#fff;"></i> YouTube
+                <a href="https://www.youtube.com/@dankim291" target="_blank" class="social-link youtube">
+                    <i class="fab fa-youtube"></i> YouTube
                 </a>
-                <a href="https://discord.gg/xzfkabWsRA" target="_blank" style="display:inline-flex;align-items:center;font-weight:600;background:#5865F2;color:#fff;padding:0.5em 1.2em;border-radius:6px;margin-right:0.5em;text-decoration:none;gap:0.5em;transition:background 0.18s;">
-                    <i class="fab fa-discord" style="font-size:1.2em;color:#fff;"></i> Discord
+                <a href="https://discord.gg/xzfkabWsRA" target="_blank" class="social-link discord">
+                    <i class="fab fa-discord"></i> Discord
                 </a>
-                <a href="https://www.instagram.com/dankim291/" target="_blank" style="display:inline-flex;align-items:center;font-weight:600;background:linear-gradient(90deg,#fd5949,#d6249f,#285AEB);color:#fff;padding:0.5em 1.2em;border-radius:6px;margin-right:0.5em;text-decoration:none;gap:0.5em;transition:background 0.18s;">
-                    <i class="fab fa-instagram" style="font-size:1.2em;color:#fff;"></i> Instagram
+                <a href="https://www.instagram.com/dankim291/" target="_blank" class="social-link instagram">
+                    <i class="fab fa-instagram"></i> Instagram
                 </a>
-                <a href="https://www.fiverr.com/s/DBZQ91V" target="_blank" class="fiverr-link" style="display:inline-flex;align-items:center;font-weight:600;background:#1dbf73;color:#fff;padding:0.5em 1.2em;border-radius:6px;margin-left:0.5em;text-decoration:none;gap:0.5em;transition:background 0.18s;">
-                    <i class="fab fa-fiverr" style="font-size:1.2em;"></i> Fiverr
+                <a href="https://www.fiverr.com/s/DBZQ91V" target="_blank" class="social-link fiverr" style="display: none;">
+                    <i class="fab fa-fiverr"></i> Fiverr
                 </a>
             </div>
         </section>
@@ -180,7 +180,7 @@
             })
             .catch(error => {
                 console.error('Error loading videos:', error);
-                document.getElementById('videoCarousel').innerHTML = '<p style="color: #7db8ff;">Unable to load videos.</p>';
+                document.getElementById('videoCarousel').innerHTML = '<p style="color: var(--text-secondary);">Unable to load videos.</p>';
             });
 
         // Scroll videos function
@@ -194,5 +194,6 @@
             }
         }
     </script>
+    <script src="navbar.js"></script>
 </body>
 </html>
